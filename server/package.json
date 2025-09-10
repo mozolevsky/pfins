@@ -1,0 +1,10 @@
+{
+    "name": "pfins_server",
+    "version": "1.0.0",
+    "description": "personal finances tracker - server side",
+    "main": "index.js",
+    "author": "mozolevsky <mrmozolevsky@gmail.com>",
+    "license": "MIT",
+    "private": true
+  }
+  
