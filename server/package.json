@@ -5,6 +5,18 @@
     "main": "index.js",
     "author": "mozolevsky <mrmozolevsky@gmail.com>",
     "license": "MIT",
-    "private": true
-  }
-  
+    "private": true,
+    "type": "module",
+    "dependencies": {
+        "@apollo/server": "^5.0.0",
+        "graphql": "^16.11.0"
+    },
+    "devDependencies": {
+        "@types/node": "^24.3.1",
+        "typescript": "^5.9.2"
+    },
+    "scripts": {
+        "compile": "tsc",
+        "start": "yarn compile && node ./dist/index.js"
+    }
+}
