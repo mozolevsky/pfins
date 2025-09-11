@@ -13,10 +13,12 @@
     },
     "devDependencies": {
         "@types/node": "^24.3.1",
+        "nodemon": "^3.0.0",
         "typescript": "^5.9.2"
     },
     "scripts": {
         "compile": "tsc",
-        "start": "yarn compile && node ./dist/index.js"
+        "start": "nodemon --exec \"yarn compile && node ./dist/index.js\" --ext ts",
+        "start:prod": "yarn compile && node ./dist/index.js"
     }
 }
