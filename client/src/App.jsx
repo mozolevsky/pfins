@@ -10,21 +10,30 @@ import {
   Tab,
   Tabs
 } from '@mui/material'
+import { gql } from '@apollo/client'
+import {useQuery} from '@apollo/client/react'
 import './App.css'
 
+const GET_ASSETS = gql`
+  query GetAssets {
+    assets {
+      type
+      value
+    }
+  }
+`;
+
 function App() {
-  const [totalAmount, setTotalAmount] = useState(1250.75)
   const [selectedTab, setSelectedTab] = useState(0)
+  const { loading, error, data } = useQuery(GET_ASSETS);
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error: {error.message}</p>;
 
   const handleTabChange = (event, newValue) => {
     setSelectedTab(newValue)
   }
 
-  const handleUpdate = () => {
-    // Generate a random amount for demo purposes
-    const newAmount = Math.round((Math.random() * 5000 + 500) * 100) / 100
-    setTotalAmount(newAmount)
-  }
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', width: '100%' }}>
@@ -51,19 +60,16 @@ function App() {
       <Container component="main" sx={{ flexGrow: 1, py: 4 }}>
         <Paper elevation={3} sx={{ p: 4, textAlign: 'center' }}>
           <Typography variant="h4" component="h1" gutterBottom>
-            Total Amount
+            Our Assets
           </Typography>
-          <Typography variant="h2" component="div" color="primary" sx={{ mb: 3 }}>
-            ${totalAmount.toFixed(2)}
+          {data.assets.map((asset) => (
+            <Typography key={asset.type} variant="h6" component="div" sx={{ mb: 0 }}>
+              {asset.type}: {asset.value}
+            </Typography>
+          ))}
+          <Typography variant="h6" component="div" sx={{ mb: 3 }} color="primary">
+            Total: {data.assets.reduce((acc, asset) => acc + asset.value, 0)}
           </Typography>
-          <Button 
-            variant="contained" 
-            color="primary" 
-            size="large"
-            onClick={handleUpdate}
-          >
-            Update
-          </Button>
         </Paper>
       </Container>
 
