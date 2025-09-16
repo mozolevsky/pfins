@@ -1,29 +1,7 @@
 import { ApolloServer } from "@apollo/server";
 import { startStandaloneServer } from "@apollo/server/standalone";
-
-const typeDefs = `#graphql
-  type Asset {
-    type: String
-    value: Int
-  }
-
-  type Query {
-    assets: [Asset]
-  }
-`;
-
-const mockedAssets = [
-  { type: "Cash", value: 1000 },
-  { type: "Stock", value: 2000 },
-  { type: "Real Estate", value: 3000 },
-  { type: "Crypto", value: 4000 },
-];
-
-const resolvers = {
-  Query: {
-    assets: () => mockedAssets,
-  },
-};
+import typeDefs from "./schema";
+import { resolvers } from "./resolvers";
 
 const server = new ApolloServer({
   typeDefs,
