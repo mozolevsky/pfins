@@ -1,0 +1,10 @@
+{
+    "database": "development",
+    "username": "root",
+    "password": null,
+    "options": {
+        "dialect": "sqlite",
+        "storage": "./assets.sqlite",
+        "logging": true
+    }
+}
