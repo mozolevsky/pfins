@@ -12,6 +12,7 @@ class AssetsDB {
   constructor() {
     const database = this.initDB();
     this.db = database;
+    this.ensureTablesExist();
   }
 
   initDB() {
@@ -24,6 +25,15 @@ class AssetsDB {
     };
 
     return db;
+  }
+
+  async ensureTablesExist() {
+    try {
+      await this.db.sequelize.sync({ force: false });
+      console.log("✅ Database tables synchronized successfully.");
+    } catch (error) {
+      console.error("❌ Error synchronizing database tables:", error);
+    }
   }
 
   async getAssets() {
