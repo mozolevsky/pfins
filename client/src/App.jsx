@@ -8,7 +8,8 @@ import {
   Box,
   Paper,
   Tab,
-  Tabs
+  Tabs,
+  Grid,
 } from '@mui/material'
 import { gql } from '@apollo/client'
 import {useQuery} from '@apollo/client/react'
@@ -62,12 +63,21 @@ function App() {
           <Typography variant="h4" component="h1" gutterBottom>
             Our Assets
           </Typography>
-          {data.assets.map((asset) => (
-            <Typography key={asset.type} variant="h6" component="div" sx={{ mb: 0 }}>
-              {asset.type}: {asset.value}
-            </Typography>
-          ))}
-          <Typography variant="h6" component="div" sx={{ mb: 3 }} color="primary">
+         
+          <Grid container spacing={2}>
+            {data.assets.map((asset) => (
+              <Grid size={{xs: 12, md: 6, lg: 3}} key={asset.type}>
+                <Paper elevation={3} sx={{ p: 2 }}>
+                  <Typography variant="h6" component="div" sx={{ mb: 0 }}>
+                    {asset.type}: {asset.value}
+                  </Typography>
+                </Paper>
+              </Grid>
+            ))}
+          </Grid>
+
+
+          <Typography variant="h6" component="div" sx={{ mb: 3 }} color="primary" marginTop={3}>
             Total: {data.assets.reduce((acc, asset) => acc + asset.value, 0)}
           </Typography>
         </Paper>
