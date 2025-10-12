@@ -3,7 +3,6 @@ import {
   AppBar,
   Toolbar,
   Typography,
-  Button,
   Container,
   Box,
   Paper,
@@ -13,6 +12,8 @@ import {
 } from '@mui/material'
 import { gql } from '@apollo/client'
 import {useQuery} from '@apollo/client/react'
+import { Title } from './components/tilte'
+import { AddAsset } from './components/addAsset'
 import './App.css'
 
 const GET_ASSETS = gql`
@@ -26,7 +27,7 @@ const GET_ASSETS = gql`
 
 function App() {
   const [selectedTab, setSelectedTab] = useState(0)
-  const { loading, error, data } = useQuery(GET_ASSETS);
+  const { loading, error, data, refetch } = useQuery<{assets: [{type: string, value: number}]}>(GET_ASSETS);
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error: {error.message}</p>;
@@ -60,9 +61,14 @@ function App() {
       {/* Main Content Area */}
       <Container component="main" sx={{ flexGrow: 1, py: 4 }}>
         <Paper elevation={3} sx={{ p: 4, textAlign: 'center' }}>
-          <Typography variant="h4" component="h1" gutterBottom>
-            Our Assets
-          </Typography>
+          <Grid container spacing={1} alignItems="center" marginBottom={4}>
+            <Grid size={{xs: 12, md: 6, lg: 2}}>
+              <Title title="Our Assets" />
+            </Grid>
+            <Grid size={{xs: 12, md: 6, lg: 1.5}}>
+              <AddAsset title="Add Asset" onAssetCreated={refetch} />
+            </Grid>
+          </Grid>
          
           <Grid container spacing={2}>
             {data.assets.map((asset) => (

@@ -10,8 +10,16 @@ export const resolvers = {
       assetsDB.getAssetByType(type),
   },
   Mutation: {
-    addAsset: (_, { asset }, { assetsDB }: { assetsDB: AssetsDB }) =>
-      assetsDB.addAsset(asset),
+    addAsset: async (_, { asset }, { assetsDB }: { assetsDB: AssetsDB }) => {
+
+      // TODO: Check if asset already exists
+    
+
+      // Add asset
+      const id = Math.random().toString(36).substring(2, 15)
+      const created = await assetsDB.addAsset({...asset, id})
+      return created
+    },
     updateAsset: (_, { asset }, { assetsDB }: { assetsDB: AssetsDB }) =>
       assetsDB.updateAsset(asset),
     deleteAsset: (_, { id }, { assetsDB }: { assetsDB: AssetsDB }) =>

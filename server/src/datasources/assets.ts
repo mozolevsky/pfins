@@ -54,13 +54,13 @@ class AssetsDB {
     return updated;
   }
 
-  async deleteAsset(id: number) {
+  async deleteAsset(id: string) {
     await this.db.Assets.destroy({ where: { id } });
     console.log(`✅ Asset ${id} deleted successfully.`);
     return id;
   }
 
-  async getAsset(id: number) {
+  async getAsset(id: string) {
     return this.db.Assets.findByPk(id);
   }
 

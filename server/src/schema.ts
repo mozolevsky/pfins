@@ -3,32 +3,31 @@ import gql from "graphql-tag";
 const typeDefs = gql`
   type Query {
     assets: [Asset]
-    asset(id: Int): Asset
-    assetByType(type: String): [Asset]
+    asset(id: String!): Asset
+    assetByType(type: String!): [Asset]
   }
 
   type Mutation {
     addAsset(asset: AssetInput): Asset
     updateAsset(asset: AssetUpdateInput): Asset
-    deleteAsset(id: Int): Int
+    deleteAsset(id: String): String
   }
 
   type Asset {
-    id: Int
+    id: String
     type: String
-    value: Int
+    value: Float
   }
 
   input AssetInput {
-    id: Int
-    type: String
-    value: Int
+    type: String!
+    value: Float!
   }
 
   input AssetUpdateInput {
-    id: Int!
-    type: String
-    value: Int
+    id: String!
+    type: String!
+    value: Float!
   }
 `;
 
