@@ -10,6 +10,7 @@ lerna-debug.log*
 .npmrc
 node_modules
 */dist
+# Yarn v2+
 .yarn/*
 !.yarn/patches
 !.yarn/plugins
