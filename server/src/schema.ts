@@ -26,7 +26,6 @@ const typeDefs = gql`
 
   input AssetUpdateInput {
     id: String!
-    type: String!
     value: Float!
   }
 `;

@@ -21,6 +21,7 @@ import './App.css'
 const GET_ASSETS = gql`
     query GetAssets {
         assets {
+            id
             type
             value
         }
@@ -89,11 +90,16 @@ function App() {
                     </Grid>
 
                     <Grid container spacing={2}>
-                        {data.assets.map((asset) => (
+                        {data.assets.map(({ id, type, value }) => (
                             <AssetItem
-                                key={asset.type}
-                                value={asset.value}
-                                type={asset.type}
+                                key={id}
+                                id={id}
+                                type={type}
+                                value={value}
+                                /**
+                                 * TODO: Refetch only the asset that was updated
+                                 */
+                                onAssetUpdated={refetch}
                             />
                         ))}
                     </Grid>

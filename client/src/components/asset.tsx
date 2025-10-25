@@ -14,10 +14,35 @@ import { Grid } from '@mui/material'
 import { Edit as EditIcon } from '@mui/icons-material'
 import { useState } from 'react'
 import type { Asset as AssetType } from '../types'
+import { gql } from '@apollo/client'
+import { useMutation } from '@apollo/client/react'
 
-export const AssetItem = ({ value, type }: AssetType) => {
+const UPDATE_ASSET = gql`
+    mutation UpdateAsset($asset: AssetUpdateInput) {
+        updateAsset(asset: $asset) {
+            type
+            value
+        }
+    }
+`
+
+export const AssetItem = ({
+    id,
+    value,
+    type,
+    onAssetUpdated,
+}: AssetType & { onAssetUpdated: () => void }) => {
     const [isEditOpen, setIsEditOpen] = useState(false)
     const [editValue, setEditValue] = useState(value.toString())
+    const [updateAsset, { loading, error }] = useMutation(UPDATE_ASSET)
+
+    if (loading) {
+        return <p>Loading...</p>
+    }
+
+    if (error) {
+        console.error(error)
+    }
 
     const handleEditClick = () => {
         setIsEditOpen(true)
@@ -29,13 +54,20 @@ export const AssetItem = ({ value, type }: AssetType) => {
     }
 
     const handleSave = () => {
-        console.log(`Saving ${type}: ${editValue}`)
-        setIsEditOpen(false)
+        updateAsset({ variables: { asset: { id, value: Number(editValue) } } })
+            .then(() => {
+                onAssetUpdated()
+                handleClose()
+            })
+            .catch((error) => {
+                console.error(error)
+                handleClose()
+            })
     }
 
     return (
         <>
-            <Grid size={{ xs: 12, md: 6, lg: 3 }} key={type}>
+            <Grid size={{ xs: 12, md: 6, lg: 3 }} key={id}>
                 <Paper elevation={3} sx={{ p: 2 }}>
                     <Box
                         sx={{

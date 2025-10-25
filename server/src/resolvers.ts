@@ -20,9 +20,11 @@ export const resolvers = {
       const created = await assetsDB.addAsset({...asset, id})
       return created
     },
-    updateAsset: (_, { asset }, { assetsDB }: { assetsDB: AssetsDB }) =>
-      assetsDB.updateAsset(asset),
+    updateAsset: async (_, { asset }, { assetsDB }: { assetsDB: AssetsDB }) => {
+      const result = await assetsDB.updateAsset({ id: asset.id, value: asset.value })
+      return result
+    },
     deleteAsset: (_, { id }, { assetsDB }: { assetsDB: AssetsDB }) =>
       assetsDB.deleteAsset(id),
   },
-};
+}
