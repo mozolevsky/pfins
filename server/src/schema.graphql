@@ -1,33 +1,27 @@
-import gql from "graphql-tag";
-
-const typeDefs = gql`
-  type Query {
+type Query {
     assets: [Asset]
     asset(id: String!): Asset
     assetByType(type: String!): [Asset]
-  }
+}
 
-  type Mutation {
+type Mutation {
     addAsset(asset: AssetInput): Asset
     updateAsset(asset: AssetUpdateInput): Asset
     deleteAsset(id: String): String
-  }
+}
 
-  type Asset {
+type Asset {
     id: String
     type: String
     value: Float
-  }
+}
 
-  input AssetInput {
+input AssetInput {
     type: String!
     value: Float!
-  }
+}
 
-  input AssetUpdateInput {
+input AssetUpdateInput {
     id: String!
     value: Float!
-  }
-`;
-
-export default typeDefs;
+}
