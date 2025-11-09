@@ -38,7 +38,9 @@ const seedDatabase = async () => {
 
     // Insert seed data
     for (const asset of seedData) {
-      await db.Assets.create(asset);
+      // Exclude `id`, let the DB auto-generate it if needed (if model expects string)
+      const { id, ...assetData } = asset;
+      await db.Assets.create(assetData);
       console.log(`✅ Created asset: ${asset.type} - $${asset.value}`);
     }
 
