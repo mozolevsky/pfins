@@ -25,12 +25,13 @@
     },
     "scripts": {
         "compile": "tsc",
-        "dev": "tsx watch ./src/index.ts",
+        "dev": "yarn generate && tsx watch ./src/index.ts",
         "start": "yarn compile && nodemon ./dist/index.js",
         "start:prod": "yarn compile && node ./dist/index.js",
         "db:init": "tsx ./src/sequelize/initDB.ts",
         "db:seed": "tsx ./src/sequelize/seedDB.ts",
         "db:setup": "yarn db:init && yarn db:seed",
         "generate": "graphql-codegen"
+
     }
 }
