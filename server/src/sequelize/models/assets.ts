@@ -1,11 +1,9 @@
 "use strict";
-import { Model, Optional } from "sequelize";
-import { Asset } from "../../types";
-
-type AssetCreationAttributes = Optional<Asset, "id">;
+import { Model } from "sequelize";
+import type { Asset } from '../../generated/graphql-types'
 
 export default (sequelize: any, DataTypes: any) => {
-  class Assets extends Model<Asset, AssetCreationAttributes> {
+  class Assets extends Model<Asset> {
     declare id: string;
     declare type: string;
     declare value: number;

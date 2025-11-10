@@ -13,18 +13,10 @@ import {
 import { Grid } from '@mui/material'
 import { Edit as EditIcon } from '@mui/icons-material'
 import { useState } from 'react'
-import type { Asset as AssetType } from '../types'
-import { gql } from '@apollo/client'
-import { useMutation } from '@apollo/client/react'
-
-const UPDATE_ASSET = gql`
-    mutation UpdateAsset($asset: AssetUpdateInput) {
-        updateAsset(asset: $asset) {
-            type
-            value
-        }
-    }
-`
+import {
+    type Asset as AssetType,
+    useUpdateAssetMutation,
+} from '../generated/graphql-types'
 
 export const AssetItem = ({
     id,
@@ -34,7 +26,7 @@ export const AssetItem = ({
 }: AssetType & { onAssetUpdated: () => void }) => {
     const [isEditOpen, setIsEditOpen] = useState(false)
     const [editValue, setEditValue] = useState(value.toString())
-    const [updateAsset, { loading, error }] = useMutation(UPDATE_ASSET)
+    const [updateAsset, { loading, error }] = useUpdateAssetMutation()
 
     if (loading) {
         return <p>Loading...</p>

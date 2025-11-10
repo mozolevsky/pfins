@@ -15,7 +15,7 @@ const { url } = await startStandaloneServer(server, {
   listen: { port: 4000 },
   context: async () => {
     return {
-      assetsDB: new AssetsDB(),
+      assetsDB: AssetsDB,
     };
   },
 });

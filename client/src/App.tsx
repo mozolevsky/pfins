@@ -10,29 +10,15 @@ import {
     Tabs,
     Grid,
 } from '@mui/material'
-import { gql } from '@apollo/client'
-import { useQuery } from '@apollo/client/react'
 import { Title } from './components/tilte'
 import { AddAsset } from './components/addAsset'
-import type { Asset } from './types'
+import { type Asset, useGetAssetsQuery } from './generated/graphql-types'
 import { AssetItem } from './components/asset'
 import './App.css'
 
-const GET_ASSETS = gql`
-    query GetAssets {
-        assets {
-            id
-            type
-            value
-        }
-    }
-`
-
 function App() {
     const [selectedTab, setSelectedTab] = useState(0)
-    const { loading, error, data, refetch } = useQuery<{ assets: Asset[] }>(
-        GET_ASSETS
-    )
+    const { loading, error, data, refetch } = useGetAssetsQuery()
 
     if (loading) return <p>Loading...</p>
     if (error) return <p>Error: {error.message}</p>

@@ -13,7 +13,6 @@ const initializeDatabase = async () => {
     const db = {
       Assets: Assets(sequelize, Sequelize.DataTypes),
       sequelize: sequelize,
-      Sequelize: Sequelize,
     };
 
     // Test connection
