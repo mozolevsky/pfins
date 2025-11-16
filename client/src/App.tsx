@@ -12,7 +12,9 @@ import {
 } from '@mui/material'
 import { Title } from './components/tilte'
 import { AddAsset } from './components/addAsset'
-import { type Asset, useGetAssetsQuery } from './generated/graphql-types'
+import { TotalChart } from './components/totalChart'
+import { useGetAssetsQuery } from './generated/graphql-types'
+
 import { AssetItem } from './components/asset'
 import './App.css'
 
@@ -104,6 +106,7 @@ function App() {
                         )}
                     </Typography>
                 </Paper>
+                <TotalChart assets={data.assets} />
             </Container>
 
             {/* Footer */}
