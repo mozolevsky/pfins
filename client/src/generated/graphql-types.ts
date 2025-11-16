@@ -74,11 +74,6 @@ export type QueryAssetByTypeArgs = {
   type: Scalars['String']['input'];
 };
 
-export type GetAssetsQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type GetAssetsQuery = { __typename?: 'Query', assets?: Array<{ __typename?: 'Asset', id?: string | null, type?: string | null, value?: number | null } | null> | null };
-
 export type AddAssetMutationVariables = Exact<{
   asset?: InputMaybe<AssetInput>;
 }>;
@@ -93,48 +88,12 @@ export type UpdateAssetMutationVariables = Exact<{
 
 export type UpdateAssetMutation = { __typename?: 'Mutation', updateAsset?: { __typename?: 'Asset', type?: string | null, value?: number | null } | null };
 
+export type GetAssetsQueryVariables = Exact<{ [key: string]: never; }>;
 
-export const GetAssetsDocument = gql`
-    query GetAssets {
-  assets {
-    id
-    type
-    value
-  }
-}
-    `;
 
-/**
- * __useGetAssetsQuery__
- *
- * To run a query within a React component, call `useGetAssetsQuery` and pass it any options that fit your needs.
- * When your component renders, `useGetAssetsQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useGetAssetsQuery({
- *   variables: {
- *   },
- * });
- */
-export function useGetAssetsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<GetAssetsQuery, GetAssetsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return ApolloReactHooks.useQuery<GetAssetsQuery, GetAssetsQueryVariables>(GetAssetsDocument, options);
-      }
-export function useGetAssetsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<GetAssetsQuery, GetAssetsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return ApolloReactHooks.useLazyQuery<GetAssetsQuery, GetAssetsQueryVariables>(GetAssetsDocument, options);
-        }
-export function useGetAssetsSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<GetAssetsQuery, GetAssetsQueryVariables>) {
-          const options = baseOptions === ApolloReactHooks.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return ApolloReactHooks.useSuspenseQuery<GetAssetsQuery, GetAssetsQueryVariables>(GetAssetsDocument, options);
-        }
-export type GetAssetsQueryHookResult = ReturnType<typeof useGetAssetsQuery>;
-export type GetAssetsLazyQueryHookResult = ReturnType<typeof useGetAssetsLazyQuery>;
-export type GetAssetsSuspenseQueryHookResult = ReturnType<typeof useGetAssetsSuspenseQuery>;
-export type GetAssetsQueryResult = Apollo.QueryResult<GetAssetsQuery, GetAssetsQueryVariables>;
+export type GetAssetsQuery = { __typename?: 'Query', assets?: Array<{ __typename?: 'Asset', id?: string | null, type?: string | null, value?: number | null } | null> | null };
+
+
 export const AddAssetDocument = gql`
     mutation AddAsset($asset: AssetInput) {
   addAsset(asset: $asset) {
@@ -203,3 +162,44 @@ export function useUpdateAssetMutation(baseOptions?: ApolloReactHooks.MutationHo
 export type UpdateAssetMutationHookResult = ReturnType<typeof useUpdateAssetMutation>;
 export type UpdateAssetMutationResult = Apollo.MutationResult<UpdateAssetMutation>;
 export type UpdateAssetMutationOptions = Apollo.BaseMutationOptions<UpdateAssetMutation, UpdateAssetMutationVariables>;
+export const GetAssetsDocument = gql`
+    query GetAssets {
+  assets {
+    id
+    type
+    value
+  }
+}
+    `;
+
+/**
+ * __useGetAssetsQuery__
+ *
+ * To run a query within a React component, call `useGetAssetsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetAssetsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetAssetsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGetAssetsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<GetAssetsQuery, GetAssetsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<GetAssetsQuery, GetAssetsQueryVariables>(GetAssetsDocument, options);
+      }
+export function useGetAssetsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<GetAssetsQuery, GetAssetsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<GetAssetsQuery, GetAssetsQueryVariables>(GetAssetsDocument, options);
+        }
+export function useGetAssetsSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<GetAssetsQuery, GetAssetsQueryVariables>) {
+          const options = baseOptions === ApolloReactHooks.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useSuspenseQuery<GetAssetsQuery, GetAssetsQueryVariables>(GetAssetsDocument, options);
+        }
+export type GetAssetsQueryHookResult = ReturnType<typeof useGetAssetsQuery>;
+export type GetAssetsLazyQueryHookResult = ReturnType<typeof useGetAssetsLazyQuery>;
+export type GetAssetsSuspenseQueryHookResult = ReturnType<typeof useGetAssetsSuspenseQuery>;
+export type GetAssetsQueryResult = Apollo.QueryResult<GetAssetsQuery, GetAssetsQueryVariables>;

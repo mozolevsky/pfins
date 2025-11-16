@@ -1,0 +1,13 @@
+mutation AddAsset($asset: AssetInput) {
+    addAsset(asset: $asset) {
+        type
+        value
+    }
+}
+
+mutation UpdateAsset($asset: AssetUpdateInput) {
+    updateAsset(asset: $asset) {
+        type
+        value
+    }
+}

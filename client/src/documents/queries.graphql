@@ -1,0 +1,7 @@
+query GetAssets {
+    assets {
+        id
+        type
+        value
+    }
+}
