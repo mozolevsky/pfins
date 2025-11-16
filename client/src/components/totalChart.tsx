@@ -1,8 +1,11 @@
 import { useMemo } from 'react'
+import { useTheme } from '@mui/material/styles'
 import { BarChart } from '@mui/x-charts/BarChart'
 import type { Asset } from '../generated/graphql-types'
 
 export const TotalChart = ({ assets }: { assets: Asset[] }) => {
+    const theme = useTheme()
+
     const titles = useMemo(() => {
         return assets.map((asset) => asset.type)
     }, assets)
@@ -35,6 +38,7 @@ export const TotalChart = ({ assets }: { assets: Asset[] }) => {
                     label: 'share',
                     valueFormatter: (value: number | null) =>
                         `${(value ?? 0).toFixed(0)}%`,
+                    color: theme.palette.primary.main,
                 },
             ]}
             height={300}
