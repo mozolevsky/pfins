@@ -7,7 +7,7 @@ type Query {
 type Mutation {
     addAsset(asset: AssetInput): Asset
     updateAsset(asset: AssetUpdateInput): Asset
-    deleteAsset(id: String): String
+    deleteAsset(id: String!): String
 }
 
 type Asset {

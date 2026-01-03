@@ -80,9 +80,14 @@ class AssetsDB {
     }
 
     async deleteAsset(id: string): Promise<string> {
-        await this.db.Assets.destroy({ where: { id } })
-        console.log(`✅ Asset ${id} deleted successfully.`)
-        return id
+        try {
+            await this.db.Assets.destroy({ where: { id } })
+            console.log(`✅ Asset ${id} deleted successfully.`)
+            return id   
+        } catch (error) {
+            console.error(`❌ Error deleting asset ${id}:`, error)
+            throw error
+        }
     }
 
     async getAsset(id: string): Promise<AssetModel | null> {

@@ -18,7 +18,7 @@ const AddAsset = ({
 }) => {
     const [open, setOpen] = useState(false)
     const [assetType, setAssetType] = useState('')
-    const [assetValue, setAssetValue] = useState(0)
+    const [assetValue, setAssetValue] = useState('§')
 
     const [createAsset, { loading, error }] = useAddAssetMutation()
 
@@ -37,7 +37,7 @@ const AddAsset = ({
     const handleClose = () => {
         setOpen(false)
         setAssetType('')
-        setAssetValue(0)
+        setAssetValue('')
     }
 
     const handleCreate = () => {
@@ -47,7 +47,10 @@ const AddAsset = ({
         }
 
         createAsset({
-            variables: { asset: { type: assetType, value: assetValue } },
+            variables: {
+                // TODO: add validation for asset value
+                asset: { type: assetType, value: Number(assetValue) },
+            },
         })
             .then(() => {
                 onAssetCreated()
@@ -87,9 +90,9 @@ const AddAsset = ({
                         label="Asset value"
                         fullWidth
                         variant="outlined"
-                        type="number"
+                        type="text"
                         value={assetValue}
-                        onChange={(e) => setAssetValue(Number(e.target.value))}
+                        onChange={(e) => setAssetValue(e.target.value)}
                         required
                     />
                 </DialogContent>

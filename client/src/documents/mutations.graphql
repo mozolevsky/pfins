@@ -11,3 +11,7 @@ mutation UpdateAsset($asset: AssetUpdateInput) {
         value
     }
 }
+
+mutation DeleteAsset($id: String!) {
+    deleteAsset(id: $id)
+}

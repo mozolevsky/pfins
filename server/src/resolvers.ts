@@ -28,7 +28,8 @@ export const resolvers: Resolvers = {
       const result = await assetsDB.updateAsset({ id: asset.id, value: asset.value })
       return result
     },
-    deleteAsset: (_, { id }, { assetsDB }: { assetsDB: AssetsDBType }) =>
-      assetsDB.deleteAsset(id),
+    deleteAsset: async (_, { id }, { assetsDB }: { assetsDB: AssetsDBType }) => {
+      return await assetsDB.deleteAsset(id)
+    },
   },
 }

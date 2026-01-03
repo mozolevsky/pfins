@@ -11,11 +11,12 @@ import {
     Box,
 } from '@mui/material'
 import { Grid } from '@mui/material'
-import { Edit as EditIcon } from '@mui/icons-material'
+import { Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material'
 import { useState } from 'react'
 import {
     type Asset as AssetType,
     useUpdateAssetMutation,
+    useDeleteAssetMutation,
 } from '../generated/graphql-types'
 
 export const AssetItem = ({
@@ -25,10 +26,13 @@ export const AssetItem = ({
     onAssetUpdated,
 }: AssetType & { onAssetUpdated: () => void }) => {
     const [isEditOpen, setIsEditOpen] = useState(false)
+    const [isDeleteOpen, setIsDeleteOpen] = useState(false)
     const [editValue, setEditValue] = useState(value.toString())
     const [updateAsset, { loading, error }] = useUpdateAssetMutation()
+    const [deleteAsset, { loading: deleteLoading, error: deleteError }] =
+        useDeleteAssetMutation()
 
-    if (loading) {
+    if (loading || deleteLoading) {
         return <p>Loading...</p>
     }
 
@@ -36,8 +40,34 @@ export const AssetItem = ({
         console.error(error)
     }
 
+    if (deleteError) {
+        console.error(deleteError)
+    }
+
     const handleEditClick = () => {
         setIsEditOpen(true)
+    }
+
+    const handleRemoveClick = () => {
+        setIsDeleteOpen(true)
+    }
+
+    const handleDeleteClose = () => {
+        setIsDeleteOpen(false)
+    }
+
+    const handleDeleteConfirm = () => {
+        if (id) {
+            deleteAsset({ variables: { id } })
+                .then(() => {
+                    onAssetUpdated()
+                    handleDeleteClose()
+                })
+                .catch((error) => {
+                    console.error(error)
+                    handleDeleteClose()
+                })
+        }
     }
 
     const handleClose = () => {
@@ -71,13 +101,22 @@ export const AssetItem = ({
                         <Typography variant="h6" component="div" sx={{ mb: 0 }}>
                             {type}: {value}
                         </Typography>
-                        <IconButton
-                            onClick={handleEditClick}
-                            size="small"
-                            color="primary"
-                        >
-                            <EditIcon />
-                        </IconButton>
+                        <Box sx={{ display: 'flex', gap: 0.5 }}>
+                            <IconButton
+                                onClick={handleEditClick}
+                                size="small"
+                                color="primary"
+                            >
+                                <EditIcon />
+                            </IconButton>
+                            <IconButton
+                                onClick={handleRemoveClick}
+                                size="small"
+                                color="error"
+                            >
+                                <DeleteIcon />
+                            </IconButton>
+                        </Box>
                     </Box>
                 </Paper>
             </Grid>
@@ -106,6 +145,31 @@ export const AssetItem = ({
                     <Button onClick={handleClose}>Close</Button>
                     <Button onClick={handleSave} variant="contained">
                         Save
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            <Dialog
+                open={isDeleteOpen}
+                onClose={handleDeleteClose}
+                maxWidth="sm"
+                fullWidth
+            >
+                <DialogTitle>Delete {type}?</DialogTitle>
+                <DialogContent>
+                    <Typography>
+                        Are you sure you want to delete {type} with value{' '}
+                        {value}? This action cannot be undone.
+                    </Typography>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleDeleteClose}>Cancel</Button>
+                    <Button
+                        onClick={handleDeleteConfirm}
+                        variant="contained"
+                        color="error"
+                    >
+                        Delete
                     </Button>
                 </DialogActions>
             </Dialog>
