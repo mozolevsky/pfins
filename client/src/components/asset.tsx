@@ -17,6 +17,7 @@ import {
 import { Grid } from '@mui/material'
 import { Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material'
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router'
 import {
     type Asset as AssetType,
     useUpdateAssetMutation,
@@ -29,6 +30,7 @@ export const AssetItem = ({
     type,
     onAssetUpdated,
 }: AssetType & { onAssetUpdated: () => void }) => {
+    const navigate = useNavigate()
     const [isEditOpen, setIsEditOpen] = useState(false)
     const [isDeleteOpen, setIsDeleteOpen] = useState(false)
     const [editValue, setEditValue] = useState(value.toString())
@@ -118,15 +120,30 @@ export const AssetItem = ({
             })
     }
 
+    const handleClick = () => {
+        navigate(`/asset/${type}`)
+    }
+
     return (
         <>
-            <Grid size={{ xs: 12, md: 6, lg: 3 }} key={id}>
+            <Grid
+                size={{ xs: 12, md: 6, lg: 3 }}
+                key={id}
+                onClick={handleClick}
+            >
                 <Paper
                     elevation={3}
                     sx={{
                         p: 2,
                         position: 'relative',
                         opacity: loading || deleteLoading ? 0.6 : 1,
+                        transition:
+                            'transform 0.2s ease-in-out, background-color 0.2s ease-in-out',
+                        '&:hover': {
+                            transform: 'scale(1.02)',
+                            backgroundColor: 'action.hover',
+                        },
+                        cursor: 'pointer',
                     }}
                 >
                     <Box

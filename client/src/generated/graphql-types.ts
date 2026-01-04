@@ -100,6 +100,13 @@ export type GetAssetsQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type GetAssetsQuery = { __typename?: 'Query', assets?: Array<{ __typename?: 'Asset', id?: string | null, type?: string | null, value?: number | null } | null> | null };
 
+export type GetAssetsByTypeQueryVariables = Exact<{
+  type: Scalars['String']['input'];
+}>;
+
+
+export type GetAssetsByTypeQuery = { __typename?: 'Query', assetByType?: Array<{ __typename?: 'Asset', id?: string | null, type?: string | null, value?: number | null } | null> | null };
+
 
 export const AddAssetDocument = gql`
     mutation AddAsset($asset: AssetInput) {
@@ -241,3 +248,45 @@ export type GetAssetsQueryHookResult = ReturnType<typeof useGetAssetsQuery>;
 export type GetAssetsLazyQueryHookResult = ReturnType<typeof useGetAssetsLazyQuery>;
 export type GetAssetsSuspenseQueryHookResult = ReturnType<typeof useGetAssetsSuspenseQuery>;
 export type GetAssetsQueryResult = Apollo.QueryResult<GetAssetsQuery, GetAssetsQueryVariables>;
+export const GetAssetsByTypeDocument = gql`
+    query GetAssetsByType($type: String!) {
+  assetByType(type: $type) {
+    id
+    type
+    value
+  }
+}
+    `;
+
+/**
+ * __useGetAssetsByTypeQuery__
+ *
+ * To run a query within a React component, call `useGetAssetsByTypeQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetAssetsByTypeQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetAssetsByTypeQuery({
+ *   variables: {
+ *      type: // value for 'type'
+ *   },
+ * });
+ */
+export function useGetAssetsByTypeQuery(baseOptions: ApolloReactHooks.QueryHookOptions<GetAssetsByTypeQuery, GetAssetsByTypeQueryVariables> & ({ variables: GetAssetsByTypeQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<GetAssetsByTypeQuery, GetAssetsByTypeQueryVariables>(GetAssetsByTypeDocument, options);
+      }
+export function useGetAssetsByTypeLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<GetAssetsByTypeQuery, GetAssetsByTypeQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<GetAssetsByTypeQuery, GetAssetsByTypeQueryVariables>(GetAssetsByTypeDocument, options);
+        }
+export function useGetAssetsByTypeSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<GetAssetsByTypeQuery, GetAssetsByTypeQueryVariables>) {
+          const options = baseOptions === ApolloReactHooks.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useSuspenseQuery<GetAssetsByTypeQuery, GetAssetsByTypeQueryVariables>(GetAssetsByTypeDocument, options);
+        }
+export type GetAssetsByTypeQueryHookResult = ReturnType<typeof useGetAssetsByTypeQuery>;
+export type GetAssetsByTypeLazyQueryHookResult = ReturnType<typeof useGetAssetsByTypeLazyQuery>;
+export type GetAssetsByTypeSuspenseQueryHookResult = ReturnType<typeof useGetAssetsByTypeSuspenseQuery>;
+export type GetAssetsByTypeQueryResult = Apollo.QueryResult<GetAssetsByTypeQuery, GetAssetsByTypeQueryVariables>;

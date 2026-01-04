@@ -5,3 +5,11 @@ query GetAssets {
         value
     }
 }
+
+query GetAssetsByType($type: String!) {
+    assetByType(type: $type) {
+        id
+        type
+        value
+    }
+}

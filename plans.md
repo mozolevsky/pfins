@@ -2,8 +2,8 @@ TODO:
 
 Product:
 
-2. asset page
-3. errors/ loading UI
+-   asset page
+-   asset history
 
 Tech:
 

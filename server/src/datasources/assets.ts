@@ -2,7 +2,6 @@ import Sequelize from 'sequelize'
 import Assets from '../sequelize/models/assets'
 import { connectSequelize } from '../sequelize/connect'
 import type { Asset, AssetInput } from '../generated/graphql-types'
-import type { Model } from 'sequelize'
 
 // Type for asset creation (AssetInput + id)
 type AssetCreateInput = AssetInput & { id: string }
