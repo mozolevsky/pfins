@@ -47,7 +47,7 @@ export type MutationAddAssetArgs = {
 
 
 export type MutationDeleteAssetArgs = {
-  id?: InputMaybe<Scalars['String']['input']>;
+  id: Scalars['String']['input'];
 };
 
 
@@ -175,7 +175,7 @@ export type AssetResolvers<ContextType = any, ParentType extends ResolversParent
 
 export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
   addAsset?: Resolver<Maybe<ResolversTypes['Asset']>, ParentType, ContextType, Partial<MutationAddAssetArgs>>;
-  deleteAsset?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType, Partial<MutationDeleteAssetArgs>>;
+  deleteAsset?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType, RequireFields<MutationDeleteAssetArgs, 'id'>>;
   updateAsset?: Resolver<Maybe<ResolversTypes['Asset']>, ParentType, ContextType, Partial<MutationUpdateAssetArgs>>;
 };
 

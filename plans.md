@@ -2,7 +2,6 @@ TODO:
 
 Product:
 
-1. remove asset
 2. asset page
 3. errors/ loading UI
 

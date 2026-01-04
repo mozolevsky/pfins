@@ -9,10 +9,14 @@ import {
     TextField,
     Button,
     Box,
+    Snackbar,
+    Alert,
+    CircularProgress,
+    Backdrop,
 } from '@mui/material'
 import { Grid } from '@mui/material'
 import { Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
     type Asset as AssetType,
     useUpdateAssetMutation,
@@ -28,20 +32,38 @@ export const AssetItem = ({
     const [isEditOpen, setIsEditOpen] = useState(false)
     const [isDeleteOpen, setIsDeleteOpen] = useState(false)
     const [editValue, setEditValue] = useState(value.toString())
+    const [errorMessage, setErrorMessage] = useState<string | null>(null)
+    const [snackbarOpen, setSnackbarOpen] = useState(false)
     const [updateAsset, { loading, error }] = useUpdateAssetMutation()
     const [deleteAsset, { loading: deleteLoading, error: deleteError }] =
         useDeleteAssetMutation()
 
-    if (loading || deleteLoading) {
-        return <p>Loading...</p>
-    }
+    useEffect(() => {
+        if (error) {
+            const message = error.message || 'Failed to update asset'
+            setErrorMessage(message)
+            setSnackbarOpen(true)
+            console.error(error)
+        }
+    }, [error])
 
-    if (error) {
-        console.error(error)
-    }
+    useEffect(() => {
+        if (deleteError) {
+            const message = deleteError.message || 'Failed to delete asset'
+            setErrorMessage(message)
+            setSnackbarOpen(true)
+            console.error(deleteError)
+        }
+    }, [deleteError])
 
-    if (deleteError) {
-        console.error(deleteError)
+    const handleSnackbarClose = (
+        event?: React.SyntheticEvent | Event,
+        reason?: string
+    ) => {
+        if (reason === 'clickaway') {
+            return
+        }
+        setSnackbarOpen(false)
     }
 
     const handleEditClick = () => {
@@ -64,6 +86,11 @@ export const AssetItem = ({
                     handleDeleteClose()
                 })
                 .catch((error) => {
+                    const message =
+                        error.message ||
+                        'Failed to delete asset. Please try again.'
+                    setErrorMessage(message)
+                    setSnackbarOpen(true)
                     console.error(error)
                     handleDeleteClose()
                 })
@@ -82,6 +109,10 @@ export const AssetItem = ({
                 handleClose()
             })
             .catch((error) => {
+                const message =
+                    error.message || 'Failed to update asset. Please try again.'
+                setErrorMessage(message)
+                setSnackbarOpen(true)
                 console.error(error)
                 handleClose()
             })
@@ -90,7 +121,14 @@ export const AssetItem = ({
     return (
         <>
             <Grid size={{ xs: 12, md: 6, lg: 3 }} key={id}>
-                <Paper elevation={3} sx={{ p: 2 }}>
+                <Paper
+                    elevation={3}
+                    sx={{
+                        p: 2,
+                        position: 'relative',
+                        opacity: loading || deleteLoading ? 0.6 : 1,
+                    }}
+                >
                     <Box
                         sx={{
                             display: 'flex',
@@ -106,6 +144,7 @@ export const AssetItem = ({
                                 onClick={handleEditClick}
                                 size="small"
                                 color="primary"
+                                disabled={loading || deleteLoading}
                             >
                                 <EditIcon />
                             </IconButton>
@@ -113,11 +152,25 @@ export const AssetItem = ({
                                 onClick={handleRemoveClick}
                                 size="small"
                                 color="error"
+                                disabled={loading || deleteLoading}
                             >
                                 <DeleteIcon />
                             </IconButton>
                         </Box>
                     </Box>
+                    {(loading || deleteLoading) && (
+                        <Backdrop
+                            open={true}
+                            sx={{
+                                position: 'absolute',
+                                zIndex: 1,
+                                borderRadius: 1,
+                                backgroundColor: 'rgba(255, 255, 255, 0.7)',
+                            }}
+                        >
+                            <CircularProgress />
+                        </Backdrop>
+                    )}
                 </Paper>
             </Grid>
 
@@ -138,12 +191,22 @@ export const AssetItem = ({
                         variant="outlined"
                         value={editValue}
                         onChange={(e) => setEditValue(e.target.value)}
+                        disabled={loading}
                         sx={{ mt: 2 }}
                     />
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={handleClose}>Close</Button>
-                    <Button onClick={handleSave} variant="contained">
+                    <Button onClick={handleClose} disabled={loading}>
+                        Close
+                    </Button>
+                    <Button
+                        onClick={handleSave}
+                        variant="contained"
+                        disabled={loading}
+                        startIcon={
+                            loading ? <CircularProgress size={16} /> : null
+                        }
+                    >
                         Save
                     </Button>
                 </DialogActions>
@@ -163,16 +226,42 @@ export const AssetItem = ({
                     </Typography>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={handleDeleteClose}>Cancel</Button>
+                    <Button
+                        onClick={handleDeleteClose}
+                        disabled={deleteLoading}
+                    >
+                        Cancel
+                    </Button>
                     <Button
                         onClick={handleDeleteConfirm}
                         variant="contained"
                         color="error"
+                        disabled={deleteLoading}
+                        startIcon={
+                            deleteLoading ? (
+                                <CircularProgress size={16} />
+                            ) : null
+                        }
                     >
                         Delete
                     </Button>
                 </DialogActions>
             </Dialog>
+
+            <Snackbar
+                open={snackbarOpen}
+                autoHideDuration={6000}
+                onClose={handleSnackbarClose}
+                anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+            >
+                <Alert
+                    onClose={handleSnackbarClose}
+                    severity="error"
+                    sx={{ width: '100%' }}
+                >
+                    {errorMessage}
+                </Alert>
+            </Snackbar>
         </>
     )
 }
