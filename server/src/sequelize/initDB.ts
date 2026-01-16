@@ -1,5 +1,6 @@
 import { connectSequelize } from "../sequelize/connect.js";
 import Assets from "../sequelize/models/assets.js";
+import AssetPriceHistory from "../sequelize/models/assetPriceHistory.js";
 import Sequelize from "sequelize";
 
 const initializeDatabase = async () => {
@@ -12,8 +13,19 @@ const initializeDatabase = async () => {
     // Initialize models
     const db = {
       Assets: Assets(sequelize, Sequelize.DataTypes),
+      AssetPriceHistory: AssetPriceHistory(sequelize, Sequelize.DataTypes),
       sequelize: sequelize,
     };
+
+    // Establish model associations
+    db.Assets.hasMany(db.AssetPriceHistory, {
+      foreignKey: "assetId",
+      as: "priceHistory",
+    });
+    db.AssetPriceHistory.belongsTo(db.Assets, {
+      foreignKey: "assetId",
+      as: "asset",
+    });
 
     // Test connection
     await sequelize.authenticate();

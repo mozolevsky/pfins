@@ -15,13 +15,18 @@ import {
     Alert,
     CircularProgress,
     Backdrop,
+    Stack,
 } from '@mui/material'
-import { Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material'
+import { Edit as EditIcon, Delete as DeleteIcon, Add as AddIcon } from '@mui/icons-material'
 import { LineChart } from '@mui/x-charts/LineChart'
+import { DatePicker } from '@mui/x-date-pickers/DatePicker'
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
 import {
-    useGetAssetsByTypeQuery,
+    useGetAssetWithHistoryQuery,
     useUpdateAssetMutation,
     useDeleteAssetMutation,
+    useAddPriceRecordMutation,
 } from '../generated/graphql-types'
 
 export const AssetPage = () => {
@@ -29,56 +34,57 @@ export const AssetPage = () => {
     const navigate = useNavigate()
     const [isEditOpen, setIsEditOpen] = useState(false)
     const [isDeleteOpen, setIsDeleteOpen] = useState(false)
+    const [isAddPriceOpen, setIsAddPriceOpen] = useState(false)
     const [editValue, setEditValue] = useState('')
+    const [manualPrice, setManualPrice] = useState('')
+    const [manualDate, setManualDate] = useState<Date | null>(new Date())
+    const [startDate, setStartDate] = useState<Date | null>(null)
+    const [endDate, setEndDate] = useState<Date | null>(null)
     const [errorMessage, setErrorMessage] = useState<string | null>(null)
     const [snackbarOpen, setSnackbarOpen] = useState(false)
 
-    const { data, loading, error, refetch } = useGetAssetsByTypeQuery({
-        variables: { type: type || '' },
+    const { data, loading, error, refetch } = useGetAssetWithHistoryQuery({
+        variables: { 
+            type: type || '',
+            startDate: startDate?.toISOString(),
+            endDate: endDate?.toISOString(),
+        },
         skip: !type,
     })
 
     const [updateAsset, { loading: updateLoading }] = useUpdateAssetMutation()
     const [deleteAsset, { loading: deleteLoading }] = useDeleteAssetMutation()
+    const [addPriceRecord, { loading: addPriceLoading }] = useAddPriceRecordMutation()
 
-    // Get current asset (most recent one)
+    // Get current asset (should be a single asset now)
     const currentAsset = useMemo(() => {
         if (!data?.assetByType || data.assetByType.length === 0) return null
-        // Assuming the last one in the array is the most recent
-        return data.assetByType[data.assetByType.length - 1]
+        // Take the first (and should be only) asset
+        return data.assetByType[0]
     }, [data])
 
-    // Prepare chart data
+    // Prepare chart data from price history
     const chartData = useMemo(() => {
-        if (!data?.assetByType || data.assetByType.length === 0) {
-            return { dates: [], values: [] }
+        if (!currentAsset?.priceHistory || currentAsset.priceHistory.length === 0) {
+            return { dates: [], values: [], dateLabels: [] }
         }
 
-        // Sort by id (assuming id represents order) or use index as time
-        const sortedAssets = [...data.assetByType]
-            .filter((asset) => asset != null)
+        const history = [...currentAsset.priceHistory]
+            .filter((record) => record != null)
             .sort((a, b) => {
-                if (!a?.id || !b?.id) return 0
-                return a.id.localeCompare(b.id)
+                if (!a?.timestamp || !b?.timestamp) return 0
+                return new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
             })
 
-        // Filter and convert values to numbers, ensuring no NaN
-        const validData = sortedAssets
-            .map((asset, index) => {
-                const value = asset?.value
-                const numValue =
-                    value != null && !isNaN(Number(value))
-                        ? Number(value)
-                        : null
-                return { index, value: numValue }
-            })
-            .filter((item) => item.value !== null)
+        const dates = history.map(record => new Date(record.timestamp!).getTime())
+        const values = history.map(record => record.price as number)
+        const dateLabels = history.map(record => {
+            const date = new Date(record.timestamp!)
+            return date.toLocaleDateString()
+        })
 
-        return {
-            dates: validData.map((item) => item.index),
-            values: validData.map((item) => item.value as number),
-        }
-    }, [data])
+        return { dates, values, dateLabels }
+    }, [currentAsset])
 
     useEffect(() => {
         if (error) {
@@ -162,6 +168,40 @@ export const AssetPage = () => {
         setSnackbarOpen(false)
     }
 
+    const handleAddPriceClick = () => {
+        setManualPrice('')
+        setManualDate(new Date())
+        setIsAddPriceOpen(true)
+    }
+
+    const handleAddPriceClose = () => {
+        setIsAddPriceOpen(false)
+    }
+
+    const handleAddPriceSave = () => {
+        if (currentAsset?.id && manualPrice && manualDate) {
+            addPriceRecord({
+                variables: {
+                    assetId: currentAsset.id,
+                    price: Number(manualPrice),
+                    timestamp: manualDate.toISOString(),
+                },
+            })
+                .then(() => {
+                    refetch()
+                    handleAddPriceClose()
+                })
+                .catch((error) => {
+                    const message =
+                        error.message ||
+                        'Failed to add price record. Please try again.'
+                    setErrorMessage(message)
+                    setSnackbarOpen(true)
+                    handleAddPriceClose()
+                })
+        }
+    }
+
     if (loading) {
         return (
             <Container>
@@ -221,20 +261,56 @@ export const AssetPage = () => {
                 </Box>
 
                 {/* Graph with Asset Changes History */}
-                <Box sx={{ mb: 4, minHeight: 300 }}>
-                    <Typography
-                        variant="h6"
-                        color="text.secondary"
-                        sx={{ mb: 2 }}
-                    >
-                        Value History
-                    </Typography>
+                <Box sx={{ mb: 4, minHeight: 400 }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                        <Typography
+                            variant="h6"
+                            color="text.secondary"
+                        >
+                            Value History
+                        </Typography>
+                        <Button
+                            variant="outlined"
+                            startIcon={<AddIcon />}
+                            onClick={handleAddPriceClick}
+                            size="small"
+                        >
+                            Add Price Record
+                        </Button>
+                    </Box>
+                    
+                    {/* Date Range Filters */}
+                    <LocalizationProvider dateAdapter={AdapterDateFns}>
+                        <Stack direction="row" spacing={2} sx={{ mb: 3 }}>
+                            <DatePicker
+                                label="Start Date"
+                                value={startDate}
+                                onChange={(newValue) => setStartDate(newValue)}
+                                slotProps={{ 
+                                    textField: { size: 'small' },
+                                    actionBar: { actions: ['clear'] }
+                                }}
+                            />
+                            <DatePicker
+                                label="End Date"
+                                value={endDate}
+                                onChange={(newValue) => setEndDate(newValue)}
+                                slotProps={{ 
+                                    textField: { size: 'small' },
+                                    actionBar: { actions: ['clear'] }
+                                }}
+                            />
+                        </Stack>
+                    </LocalizationProvider>
+
                     {chartData.values.length > 0 ? (
                         <LineChart
                             xAxis={[
                                 {
                                     data: chartData.dates,
-                                    label: 'Time',
+                                    label: 'Date',
+                                    scaleType: 'time',
+                                    valueFormatter: (value) => new Date(value).toLocaleDateString(),
                                 },
                             ]}
                             yAxis={[
@@ -247,9 +323,11 @@ export const AssetPage = () => {
                                     data: chartData.values,
                                     label: 'Asset Value',
                                     curve: 'linear',
+                                    showMark: true,
                                 },
                             ]}
                             height={300}
+                            margin={{ left: 70, right: 20, top: 20, bottom: 70 }}
                         />
                     ) : (
                         <Box
@@ -263,7 +341,7 @@ export const AssetPage = () => {
                             }}
                         >
                             <Typography color="text.secondary">
-                                No history data available
+                                No history data available. Add price records to see the chart.
                             </Typography>
                         </Box>
                     )}
@@ -294,7 +372,7 @@ export const AssetPage = () => {
                 </Box>
 
                 {/* Loading Backdrop */}
-                {(updateLoading || deleteLoading) && (
+                {(updateLoading || deleteLoading || addPriceLoading) && (
                     <Backdrop
                         open={true}
                         sx={{
@@ -384,6 +462,60 @@ export const AssetPage = () => {
                         }
                     >
                         Delete
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Add Price Record Dialog */}
+            <Dialog
+                open={isAddPriceOpen}
+                onClose={handleAddPriceClose}
+                maxWidth="sm"
+                fullWidth
+            >
+                <DialogTitle>Add Price Record</DialogTitle>
+                <DialogContent>
+                    <LocalizationProvider dateAdapter={AdapterDateFns}>
+                        <Stack spacing={2} sx={{ mt: 2 }}>
+                            <TextField
+                                autoFocus
+                                label="Price"
+                                type="number"
+                                fullWidth
+                                variant="outlined"
+                                value={manualPrice}
+                                onChange={(e) => setManualPrice(e.target.value)}
+                                disabled={addPriceLoading}
+                            />
+                            <DatePicker
+                                label="Date"
+                                value={manualDate}
+                                onChange={(newValue) => setManualDate(newValue)}
+                                slotProps={{
+                                    textField: {
+                                        fullWidth: true,
+                                        variant: 'outlined',
+                                    },
+                                }}
+                            />
+                        </Stack>
+                    </LocalizationProvider>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleAddPriceClose} disabled={addPriceLoading}>
+                        Cancel
+                    </Button>
+                    <Button
+                        onClick={handleAddPriceSave}
+                        variant="contained"
+                        disabled={addPriceLoading || !manualPrice || !manualDate}
+                        startIcon={
+                            addPriceLoading ? (
+                                <CircularProgress size={16} />
+                            ) : null
+                        }
+                    >
+                        Add
                     </Button>
                 </DialogActions>
             </Dialog>

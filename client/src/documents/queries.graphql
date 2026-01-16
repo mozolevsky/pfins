@@ -13,3 +13,25 @@ query GetAssetsByType($type: String!) {
         value
     }
 }
+
+query GetAssetWithHistory($type: String!, $startDate: String, $endDate: String) {
+    assetByType(type: $type) {
+        id
+        type
+        value
+        priceHistory(startDate: $startDate, endDate: $endDate) {
+            id
+            price
+            timestamp
+        }
+    }
+}
+
+query GetPriceHistory($assetId: String!, $startDate: String, $endDate: String, $limit: Int) {
+    priceHistory(assetId: $assetId, startDate: $startDate, endDate: $endDate, limit: $limit) {
+        id
+        assetId
+        price
+        timestamp
+    }
+}

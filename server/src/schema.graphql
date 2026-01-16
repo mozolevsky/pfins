@@ -2,18 +2,28 @@ type Query {
     assets: [Asset]
     asset(id: String!): Asset
     assetByType(type: String!): [Asset]
+    priceHistory(assetId: String!, startDate: String, endDate: String, limit: Int): [PriceHistory]
 }
 
 type Mutation {
     addAsset(asset: AssetInput): Asset
     updateAsset(asset: AssetUpdateInput): Asset
     deleteAsset(id: String!): String
+    addPriceRecord(assetId: String!, price: Float!, timestamp: String): PriceHistory
 }
 
 type Asset {
     id: String
     type: String
     value: Float
+    priceHistory(startDate: String, endDate: String, limit: Int): [PriceHistory]
+}
+
+type PriceHistory {
+    id: Int!
+    assetId: String!
+    price: Float!
+    timestamp: String!
 }
 
 input AssetInput {

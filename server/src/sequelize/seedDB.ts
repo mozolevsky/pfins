@@ -30,18 +30,18 @@ const seedDatabase = async () => {
 
     // Initial assets seed data
     const seedData = [
-      { id: 1, type: "Cash", value: 1000 },
-      { id: 2, type: "Stock", value: 2000 },
-      { id: 3, type: "Real Estate", value: 3000 },
-      { id: 4, type: "Crypto", value: 4000 },
+      { type: "Cash", value: 1000 },
+      { type: "Stock", value: 2000 },
+      { type: "Real Estate", value: 3000 },
+      { type: "Crypto", value: 4000 },
     ];
 
     // Insert seed data
-    for (const asset of seedData) {
-      // Exclude `id`, let the DB auto-generate it if needed (if model expects string)
-      const { id, ...assetData } = asset;
-      await db.Assets.create(assetData);
-      console.log(`✅ Created asset: ${asset.type} - $${asset.value}`);
+    for (const assetData of seedData) {
+      // Generate a unique ID for each asset
+      const id = Math.random().toString(36).substring(2, 15);
+      await db.Assets.create({ ...assetData, id });
+      console.log(`✅ Created asset: ${assetData.type} - $${assetData.value}`);
     }
 
     console.log("🎉 Database seeded successfully!");

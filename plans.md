@@ -4,6 +4,7 @@ Product:
 
 -   asset page
 -   asset history
+-   fix: PriceHistory.id null on asset page (Sequelize instances + object spread); use raw queries + normalize timestamp (Date|string)
 
 Tech:
 

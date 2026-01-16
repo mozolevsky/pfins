@@ -2,6 +2,7 @@ import { ApolloServer } from "@apollo/server";
 import { startStandaloneServer } from "@apollo/server/standalone";
 import { resolvers } from "./resolvers";
 import AssetsDB from "./datasources/assets";
+import PriceHistoryDB from "./datasources/priceHistory";
 import { readFile } from "./utils";
 
 const typeDefs = readFile("schema.graphql");
@@ -16,6 +17,7 @@ const { url } = await startStandaloneServer(server, {
   context: async () => {
     return {
       assetsDB: AssetsDB,
+      priceHistoryDB: PriceHistoryDB,
     };
   },
 });

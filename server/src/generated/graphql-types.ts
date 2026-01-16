@@ -19,8 +19,16 @@ export type Scalars = {
 export type Asset = {
   __typename?: 'Asset';
   id?: Maybe<Scalars['String']['output']>;
+  priceHistory?: Maybe<Array<Maybe<PriceHistory>>>;
   type?: Maybe<Scalars['String']['output']>;
   value?: Maybe<Scalars['Float']['output']>;
+};
+
+
+export type AssetPriceHistoryArgs = {
+  endDate?: InputMaybe<Scalars['String']['input']>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  startDate?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type AssetInput = {
@@ -36,6 +44,7 @@ export type AssetUpdateInput = {
 export type Mutation = {
   __typename?: 'Mutation';
   addAsset?: Maybe<Asset>;
+  addPriceRecord?: Maybe<PriceHistory>;
   deleteAsset?: Maybe<Scalars['String']['output']>;
   updateAsset?: Maybe<Asset>;
 };
@@ -43,6 +52,13 @@ export type Mutation = {
 
 export type MutationAddAssetArgs = {
   asset?: InputMaybe<AssetInput>;
+};
+
+
+export type MutationAddPriceRecordArgs = {
+  assetId: Scalars['String']['input'];
+  price: Scalars['Float']['input'];
+  timestamp?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -55,11 +71,20 @@ export type MutationUpdateAssetArgs = {
   asset?: InputMaybe<AssetUpdateInput>;
 };
 
+export type PriceHistory = {
+  __typename?: 'PriceHistory';
+  assetId: Scalars['String']['output'];
+  id: Scalars['Int']['output'];
+  price: Scalars['Float']['output'];
+  timestamp: Scalars['String']['output'];
+};
+
 export type Query = {
   __typename?: 'Query';
   asset?: Maybe<Asset>;
   assetByType?: Maybe<Array<Maybe<Asset>>>;
   assets?: Maybe<Array<Maybe<Asset>>>;
+  priceHistory?: Maybe<Array<Maybe<PriceHistory>>>;
 };
 
 
@@ -70,6 +95,14 @@ export type QueryAssetArgs = {
 
 export type QueryAssetByTypeArgs = {
   type: Scalars['String']['input'];
+};
+
+
+export type QueryPriceHistoryArgs = {
+  assetId: Scalars['String']['input'];
+  endDate?: InputMaybe<Scalars['String']['input']>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  startDate?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -150,7 +183,9 @@ export type ResolversTypes = {
   AssetUpdateInput: AssetUpdateInput;
   Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
   Float: ResolverTypeWrapper<Scalars['Float']['output']>;
+  Int: ResolverTypeWrapper<Scalars['Int']['output']>;
   Mutation: ResolverTypeWrapper<Record<PropertyKey, never>>;
+  PriceHistory: ResolverTypeWrapper<PriceHistory>;
   Query: ResolverTypeWrapper<Record<PropertyKey, never>>;
   String: ResolverTypeWrapper<Scalars['String']['output']>;
 };
@@ -162,32 +197,45 @@ export type ResolversParentTypes = {
   AssetUpdateInput: AssetUpdateInput;
   Boolean: Scalars['Boolean']['output'];
   Float: Scalars['Float']['output'];
+  Int: Scalars['Int']['output'];
   Mutation: Record<PropertyKey, never>;
+  PriceHistory: PriceHistory;
   Query: Record<PropertyKey, never>;
   String: Scalars['String']['output'];
 };
 
 export type AssetResolvers<ContextType = any, ParentType extends ResolversParentTypes['Asset'] = ResolversParentTypes['Asset']> = {
   id?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  priceHistory?: Resolver<Maybe<Array<Maybe<ResolversTypes['PriceHistory']>>>, ParentType, ContextType, Partial<AssetPriceHistoryArgs>>;
   type?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   value?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
 };
 
 export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
   addAsset?: Resolver<Maybe<ResolversTypes['Asset']>, ParentType, ContextType, Partial<MutationAddAssetArgs>>;
+  addPriceRecord?: Resolver<Maybe<ResolversTypes['PriceHistory']>, ParentType, ContextType, RequireFields<MutationAddPriceRecordArgs, 'assetId' | 'price'>>;
   deleteAsset?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType, RequireFields<MutationDeleteAssetArgs, 'id'>>;
   updateAsset?: Resolver<Maybe<ResolversTypes['Asset']>, ParentType, ContextType, Partial<MutationUpdateAssetArgs>>;
+};
+
+export type PriceHistoryResolvers<ContextType = any, ParentType extends ResolversParentTypes['PriceHistory'] = ResolversParentTypes['PriceHistory']> = {
+  assetId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  price?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
+  timestamp?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
 };
 
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
   asset?: Resolver<Maybe<ResolversTypes['Asset']>, ParentType, ContextType, RequireFields<QueryAssetArgs, 'id'>>;
   assetByType?: Resolver<Maybe<Array<Maybe<ResolversTypes['Asset']>>>, ParentType, ContextType, RequireFields<QueryAssetByTypeArgs, 'type'>>;
   assets?: Resolver<Maybe<Array<Maybe<ResolversTypes['Asset']>>>, ParentType, ContextType>;
+  priceHistory?: Resolver<Maybe<Array<Maybe<ResolversTypes['PriceHistory']>>>, ParentType, ContextType, RequireFields<QueryPriceHistoryArgs, 'assetId'>>;
 };
 
 export type Resolvers<ContextType = any> = {
   Asset?: AssetResolvers<ContextType>;
   Mutation?: MutationResolvers<ContextType>;
+  PriceHistory?: PriceHistoryResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
 };
 

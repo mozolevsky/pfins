@@ -15,3 +15,12 @@ mutation UpdateAsset($asset: AssetUpdateInput) {
 mutation DeleteAsset($id: String!) {
     deleteAsset(id: $id)
 }
+
+mutation AddPriceRecord($assetId: String!, $price: Float!, $timestamp: String) {
+    addPriceRecord(assetId: $assetId, price: $price, timestamp: $timestamp) {
+        id
+        assetId
+        price
+        timestamp
+    }
+}

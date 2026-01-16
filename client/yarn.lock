@@ -2520,6 +2520,54 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@mui/x-date-pickers@npm:^8.24.0":
+  version: 8.24.0
+  resolution: "@mui/x-date-pickers@npm:8.24.0"
+  dependencies:
+    "@babel/runtime": "npm:^7.28.4"
+    "@mui/utils": "npm:^7.3.5"
+    "@mui/x-internals": "npm:8.24.0"
+    "@types/react-transition-group": "npm:^4.4.12"
+    clsx: "npm:^2.1.1"
+    prop-types: "npm:^15.8.1"
+    react-transition-group: "npm:^4.4.5"
+  peerDependencies:
+    "@emotion/react": ^11.9.0
+    "@emotion/styled": ^11.8.1
+    "@mui/material": ^5.15.14 || ^6.0.0 || ^7.0.0
+    "@mui/system": ^5.15.14 || ^6.0.0 || ^7.0.0
+    date-fns: ^2.25.0 || ^3.2.0 || ^4.0.0
+    date-fns-jalali: ^2.13.0-0 || ^3.2.0-0 || ^4.0.0-0
+    dayjs: ^1.10.7
+    luxon: ^3.0.2
+    moment: ^2.29.4
+    moment-hijri: ^2.1.2 || ^3.0.0
+    moment-jalaali: ^0.7.4 || ^0.8.0 || ^0.9.0 || ^0.10.0
+    react: ^17.0.0 || ^18.0.0 || ^19.0.0
+    react-dom: ^17.0.0 || ^18.0.0 || ^19.0.0
+  peerDependenciesMeta:
+    "@emotion/react":
+      optional: true
+    "@emotion/styled":
+      optional: true
+    date-fns:
+      optional: true
+    date-fns-jalali:
+      optional: true
+    dayjs:
+      optional: true
+    luxon:
+      optional: true
+    moment:
+      optional: true
+    moment-hijri:
+      optional: true
+    moment-jalaali:
+      optional: true
+  checksum: 10c0/aeefbbb484ac1806a193a1920f4f105d3c39fd520e3c3d53e175bb44943cb8663801398b1f8ca618a9c734f7abdab0dba5d1d19961c1639cec64ee8c9e821320
+  languageName: node
+  linkType: hard
+
 "@mui/x-internal-gestures@npm:0.3.5":
   version: 0.3.5
   resolution: "@mui/x-internal-gestures@npm:0.3.5"
@@ -2540,6 +2588,20 @@ __metadata:
   peerDependencies:
     react: ^17.0.0 || ^18.0.0 || ^19.0.0
   checksum: 10c0/3dba73b4df2b82259ade14a8c7413b8525bfd6148334ec7e2ad64d2c2a5b37468ee17b6deed93bb828afc7bd31e96bd3c1d22b8502cb3ec306488e9e01832188
+  languageName: node
+  linkType: hard
+
+"@mui/x-internals@npm:8.24.0":
+  version: 8.24.0
+  resolution: "@mui/x-internals@npm:8.24.0"
+  dependencies:
+    "@babel/runtime": "npm:^7.28.4"
+    "@mui/utils": "npm:^7.3.5"
+    reselect: "npm:^5.1.1"
+    use-sync-external-store: "npm:^1.6.0"
+  peerDependencies:
+    react: ^17.0.0 || ^18.0.0 || ^19.0.0
+  checksum: 10c0/eb95741206e44ae74762c28e74f9809daa19d8c5dfba09d20e4c1eada03d304aacf29ed00cc9bcbea75222bd27b121a79182ff92ff9ebaacdb9b669c33646a51
   languageName: node
   linkType: hard
 
@@ -3771,6 +3833,13 @@ __metadata:
   version: 2.2.3
   resolution: "dataloader@npm:2.2.3"
   checksum: 10c0/9b9a056fbc863ca86da87d59e053e871e263b4966aa4d55e40d61a65e96815fae5530ca220629064ca5f8e3000c0c4ec93292e170c38ff393fb34256b4d7c1aa
+  languageName: node
+  linkType: hard
+
+"date-fns@npm:^4.1.0":
+  version: 4.1.0
+  resolution: "date-fns@npm:4.1.0"
+  checksum: 10c0/b79ff32830e6b7faa009590af6ae0fb8c3fd9ffad46d930548fbb5acf473773b4712ae887e156ba91a7b3dc30591ce0f517d69fd83bd9c38650fdc03b4e0bac8
   languageName: node
   linkType: hard
 
@@ -5686,10 +5755,12 @@ __metadata:
     "@mui/icons-material": "npm:^7.3.2"
     "@mui/material": "npm:^7.3.2"
     "@mui/x-charts": "npm:^8.18.0"
+    "@mui/x-date-pickers": "npm:^8.24.0"
     "@types/react": "npm:^19.1.10"
     "@types/react-dom": "npm:^19.1.7"
     "@vitejs/plugin-react": "npm:^5.0.0"
     babel-plugin-react-compiler: "npm:^1.0.0"
+    date-fns: "npm:^4.1.0"
     eslint: "npm:^9.33.0"
     eslint-plugin-react-hooks: "npm:^5.2.0"
     eslint-plugin-react-refresh: "npm:^0.4.20"

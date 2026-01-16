@@ -1,4 +1,5 @@
 import { AssetsDBType } from "./datasources/assets";
+import { PriceHistoryDBType } from "./datasources/priceHistory";
 import { Resolvers } from "./generated/graphql-types";
 
 export const resolvers: Resolvers = {
@@ -9,6 +10,19 @@ export const resolvers: Resolvers = {
       assetsDB.getAsset(id),
     assetByType: (_, { type }, { assetsDB }: { assetsDB: AssetsDBType }) =>
       assetsDB.getAssetByType(type),
+    priceHistory: async (_, { assetId, startDate, endDate, limit }, { priceHistoryDB }: { priceHistoryDB: PriceHistoryDBType }) => {
+      const history = await priceHistoryDB.getPriceHistory(assetId, startDate, endDate, limit);
+      return history.map(record => {
+        const timestampString = record.timestamp instanceof Date 
+          ? record.timestamp.toISOString()
+          : new Date(record.timestamp).toISOString();
+        
+        return {
+          ...record,
+          timestamp: timestampString,
+        };
+      });
+    },
   },
   Mutation: {
     addAsset: async (_, { asset }, { assetsDB }: { assetsDB: AssetsDBType }) => {
@@ -30,6 +44,35 @@ export const resolvers: Resolvers = {
     },
     deleteAsset: async (_, { id }, { assetsDB }: { assetsDB: AssetsDBType }) => {
       return await assetsDB.deleteAsset(id)
+    },
+    addPriceRecord: async (_, { assetId, price, timestamp }, { priceHistoryDB }: { priceHistoryDB: PriceHistoryDBType }) => {
+      const record = await priceHistoryDB.addPriceRecord(assetId, price, timestamp);
+      const timestampString = record.timestamp instanceof Date 
+        ? record.timestamp.toISOString()
+        : new Date(record.timestamp).toISOString();
+      
+      return {
+        ...record,
+        timestamp: timestampString,
+      };
+    },
+  },
+  Asset: {
+    priceHistory: async (parent, { startDate, endDate, limit }, { priceHistoryDB }: { priceHistoryDB: PriceHistoryDBType }) => {
+      if (!parent.id) return [];
+      
+      const history = await priceHistoryDB.getPriceHistory(parent.id, startDate, endDate, limit);
+      
+      return history.map(record => {
+        const timestampString = record.timestamp instanceof Date 
+          ? record.timestamp.toISOString()
+          : new Date(record.timestamp).toISOString();
+        
+        return {
+          ...record,
+          timestamp: timestampString,
+        };
+      });
     },
   },
 }
