@@ -84,6 +84,37 @@ class PriceHistoryDB {
   }
 
   /**
+   * Update an existing price record by id
+   */
+  async updatePriceRecord(
+    id: number,
+    price: number,
+    timestamp: string
+  ): Promise<PriceHistoryRecord> {
+    const recordTimestamp = new Date(timestamp)
+
+    const [updatedCount] = await db.AssetPriceHistory.update(
+      { price, timestamp: recordTimestamp },
+      { where: { id } }
+    )
+
+    if (!updatedCount) {
+      throw new Error(`Price record ${id} not found`)
+    }
+
+    const updated = await db.AssetPriceHistory.findByPk(id, {
+      attributes: ['id', 'assetId', 'price', 'timestamp'],
+      raw: true,
+    })
+
+    if (!updated) {
+      throw new Error(`Price record ${id} not found`)
+    }
+
+    return updated as unknown as PriceHistoryRecord
+  }
+
+  /**
    * Get the latest price for an asset
    */
   async getLatestPrice(assetId: string): Promise<PriceHistoryRecord | null> {
@@ -95,6 +126,28 @@ class PriceHistoryDB {
     })
 
     return record as unknown as PriceHistoryRecord | null
+  }
+
+  /**
+   * Delete a single price record by id.
+   * Returns the deleted record (so callers can sync asset value).
+   */
+  async deletePriceRecord(id: number): Promise<PriceHistoryRecord> {
+    const existing = await db.AssetPriceHistory.findByPk(id, {
+      attributes: ['id', 'assetId', 'price', 'timestamp'],
+      raw: true,
+    })
+
+    if (!existing) {
+      throw new Error(`Price record ${id} not found`)
+    }
+
+    const deletedCount = await db.AssetPriceHistory.destroy({ where: { id } })
+    if (!deletedCount) {
+      throw new Error(`Price record ${id} not found`)
+    }
+
+    return existing as unknown as PriceHistoryRecord
   }
 
   /**

@@ -55,6 +55,14 @@ class AssetsDB {
         }
     }
 
+    /**
+     * Set asset value without inserting a history record.
+     * Use this when history is the source of truth.
+     */
+    async setAssetValue({ id, value }: { id: string; value: number }): Promise<void> {
+        await db.Assets.update({ value }, { where: { id } })
+    }
+
     async deleteAsset(id: string): Promise<string> {
         try {
             await db.Assets.destroy({ where: { id } })

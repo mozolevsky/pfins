@@ -10,6 +10,8 @@ type Mutation {
     updateAsset(asset: AssetUpdateInput): Asset
     deleteAsset(id: String!): String
     addPriceRecord(assetId: String!, price: Float!, timestamp: String): PriceHistory
+    updatePriceRecord(id: Int!, price: Float!, timestamp: String!): PriceHistory
+    deletePriceRecord(id: Int!): Int!
 }
 
 type Asset {

@@ -48,7 +48,9 @@ export type Mutation = {
   addAsset?: Maybe<Asset>;
   addPriceRecord?: Maybe<PriceHistory>;
   deleteAsset?: Maybe<Scalars['String']['output']>;
+  deletePriceRecord: Scalars['Int']['output'];
   updateAsset?: Maybe<Asset>;
+  updatePriceRecord?: Maybe<PriceHistory>;
 };
 
 
@@ -69,8 +71,20 @@ export type MutationDeleteAssetArgs = {
 };
 
 
+export type MutationDeletePriceRecordArgs = {
+  id: Scalars['Int']['input'];
+};
+
+
 export type MutationUpdateAssetArgs = {
   asset?: InputMaybe<AssetUpdateInput>;
+};
+
+
+export type MutationUpdatePriceRecordArgs = {
+  id: Scalars['Int']['input'];
+  price: Scalars['Float']['input'];
+  timestamp: Scalars['String']['input'];
 };
 
 export type PriceHistory = {
@@ -136,6 +150,22 @@ export type AddPriceRecordMutationVariables = Exact<{
 
 
 export type AddPriceRecordMutation = { __typename?: 'Mutation', addPriceRecord?: { __typename?: 'PriceHistory', id: number, assetId: string, price: number, timestamp: string } | null };
+
+export type UpdatePriceRecordMutationVariables = Exact<{
+  id: Scalars['Int']['input'];
+  price: Scalars['Float']['input'];
+  timestamp: Scalars['String']['input'];
+}>;
+
+
+export type UpdatePriceRecordMutation = { __typename?: 'Mutation', updatePriceRecord?: { __typename?: 'PriceHistory', id: number, assetId: string, price: number, timestamp: string } | null };
+
+export type DeletePriceRecordMutationVariables = Exact<{
+  id: Scalars['Int']['input'];
+}>;
+
+
+export type DeletePriceRecordMutation = { __typename?: 'Mutation', deletePriceRecord: number };
 
 export type GetAssetsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -306,6 +336,75 @@ export function useAddPriceRecordMutation(baseOptions?: ApolloReactHooks.Mutatio
 export type AddPriceRecordMutationHookResult = ReturnType<typeof useAddPriceRecordMutation>;
 export type AddPriceRecordMutationResult = Apollo.MutationResult<AddPriceRecordMutation>;
 export type AddPriceRecordMutationOptions = Apollo.BaseMutationOptions<AddPriceRecordMutation, AddPriceRecordMutationVariables>;
+export const UpdatePriceRecordDocument = gql`
+    mutation UpdatePriceRecord($id: Int!, $price: Float!, $timestamp: String!) {
+  updatePriceRecord(id: $id, price: $price, timestamp: $timestamp) {
+    id
+    assetId
+    price
+    timestamp
+  }
+}
+    `;
+export type UpdatePriceRecordMutationFn = Apollo.MutationFunction<UpdatePriceRecordMutation, UpdatePriceRecordMutationVariables>;
+
+/**
+ * __useUpdatePriceRecordMutation__
+ *
+ * To run a mutation, you first call `useUpdatePriceRecordMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdatePriceRecordMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updatePriceRecordMutation, { data, loading, error }] = useUpdatePriceRecordMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      price: // value for 'price'
+ *      timestamp: // value for 'timestamp'
+ *   },
+ * });
+ */
+export function useUpdatePriceRecordMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<UpdatePriceRecordMutation, UpdatePriceRecordMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<UpdatePriceRecordMutation, UpdatePriceRecordMutationVariables>(UpdatePriceRecordDocument, options);
+      }
+export type UpdatePriceRecordMutationHookResult = ReturnType<typeof useUpdatePriceRecordMutation>;
+export type UpdatePriceRecordMutationResult = Apollo.MutationResult<UpdatePriceRecordMutation>;
+export type UpdatePriceRecordMutationOptions = Apollo.BaseMutationOptions<UpdatePriceRecordMutation, UpdatePriceRecordMutationVariables>;
+export const DeletePriceRecordDocument = gql`
+    mutation DeletePriceRecord($id: Int!) {
+  deletePriceRecord(id: $id)
+}
+    `;
+export type DeletePriceRecordMutationFn = Apollo.MutationFunction<DeletePriceRecordMutation, DeletePriceRecordMutationVariables>;
+
+/**
+ * __useDeletePriceRecordMutation__
+ *
+ * To run a mutation, you first call `useDeletePriceRecordMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeletePriceRecordMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deletePriceRecordMutation, { data, loading, error }] = useDeletePriceRecordMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeletePriceRecordMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<DeletePriceRecordMutation, DeletePriceRecordMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<DeletePriceRecordMutation, DeletePriceRecordMutationVariables>(DeletePriceRecordDocument, options);
+      }
+export type DeletePriceRecordMutationHookResult = ReturnType<typeof useDeletePriceRecordMutation>;
+export type DeletePriceRecordMutationResult = Apollo.MutationResult<DeletePriceRecordMutation>;
+export type DeletePriceRecordMutationOptions = Apollo.BaseMutationOptions<DeletePriceRecordMutation, DeletePriceRecordMutationVariables>;
 export const GetAssetsDocument = gql`
     query GetAssets {
   assets {

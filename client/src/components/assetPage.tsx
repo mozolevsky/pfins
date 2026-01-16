@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from 'react-router'
+import { useParams } from 'react-router'
 import { useState, useEffect, useMemo } from 'react'
 import {
     Box,
@@ -16,35 +16,55 @@ import {
     CircularProgress,
     Backdrop,
     Stack,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    IconButton,
+    Tooltip,
 } from '@mui/material'
-import { Edit as EditIcon, Delete as DeleteIcon, Add as AddIcon } from '@mui/icons-material'
+import {
+    Edit as EditIcon,
+    Delete as DeleteIcon,
+    Add as AddIcon,
+    Check as CheckIcon,
+    Close as CloseIcon,
+} from '@mui/icons-material'
 import { LineChart } from '@mui/x-charts/LineChart'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
 import {
     useGetAssetWithHistoryQuery,
-    useUpdateAssetMutation,
-    useDeleteAssetMutation,
     useAddPriceRecordMutation,
+    useUpdatePriceRecordMutation,
+    useDeletePriceRecordMutation,
 } from '../generated/graphql-types'
 
 export const AssetPage = () => {
     const { type } = useParams<{ type: string }>()
-    const navigate = useNavigate()
-    const [isEditOpen, setIsEditOpen] = useState(false)
-    const [isDeleteOpen, setIsDeleteOpen] = useState(false)
     const [isAddPriceOpen, setIsAddPriceOpen] = useState(false)
-    const [editValue, setEditValue] = useState('')
     const [manualPrice, setManualPrice] = useState('')
     const [manualDate, setManualDate] = useState<Date | null>(new Date())
     const [startDate, setStartDate] = useState<Date | null>(null)
     const [endDate, setEndDate] = useState<Date | null>(null)
     const [errorMessage, setErrorMessage] = useState<string | null>(null)
     const [snackbarOpen, setSnackbarOpen] = useState(false)
+    const [editingHistoryId, setEditingHistoryId] = useState<number | null>(
+        null
+    )
+    const [editingHistoryPrice, setEditingHistoryPrice] = useState('')
+    const [editingHistoryDate, setEditingHistoryDate] = useState<Date | null>(
+        null
+    )
+    const [savingHistoryId, setSavingHistoryId] = useState<number | null>(null)
+    const [deletingHistoryId, setDeletingHistoryId] = useState<number | null>(null)
+    const [isDeleteHistoryOpen, setIsDeleteHistoryOpen] = useState(false)
 
     const { data, loading, error, refetch } = useGetAssetWithHistoryQuery({
-        variables: { 
+        variables: {
             type: type || '',
             startDate: startDate?.toISOString(),
             endDate: endDate?.toISOString(),
@@ -52,9 +72,11 @@ export const AssetPage = () => {
         skip: !type,
     })
 
-    const [updateAsset, { loading: updateLoading }] = useUpdateAssetMutation()
-    const [deleteAsset, { loading: deleteLoading }] = useDeleteAssetMutation()
-    const [addPriceRecord, { loading: addPriceLoading }] = useAddPriceRecordMutation()
+    const [addPriceRecord, { loading: addPriceLoading }] =
+        useAddPriceRecordMutation()
+    const [updatePriceRecord] = useUpdatePriceRecordMutation()
+    const [deletePriceRecord, { loading: deleteHistoryLoading }] =
+        useDeletePriceRecordMutation()
 
     // Get current asset (should be a single asset now)
     const currentAsset = useMemo(() => {
@@ -65,7 +87,10 @@ export const AssetPage = () => {
 
     // Prepare chart data from price history
     const chartData = useMemo(() => {
-        if (!currentAsset?.priceHistory || currentAsset.priceHistory.length === 0) {
+        if (
+            !currentAsset?.priceHistory ||
+            currentAsset.priceHistory.length === 0
+        ) {
             return { dates: [], values: [], dateLabels: [] }
         }
 
@@ -73,17 +98,45 @@ export const AssetPage = () => {
             .filter((record) => record != null)
             .sort((a, b) => {
                 if (!a?.timestamp || !b?.timestamp) return 0
-                return new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+                return (
+                    new Date(a.timestamp).getTime() -
+                    new Date(b.timestamp).getTime()
+                )
             })
 
-        const dates = history.map(record => new Date(record.timestamp!).getTime())
-        const values = history.map(record => record.price as number)
-        const dateLabels = history.map(record => {
+        const dates = history.map((record) =>
+            new Date(record.timestamp!).getTime()
+        )
+        const values = history.map((record) => record.price as number)
+        const dateLabels = history.map((record) => {
             const date = new Date(record.timestamp!)
             return date.toLocaleDateString()
         })
 
         return { dates, values, dateLabels }
+    }, [currentAsset])
+
+    const historyRows = useMemo(() => {
+        if (
+            !currentAsset?.priceHistory ||
+            currentAsset.priceHistory.length === 0
+        )
+            return []
+
+        return [...currentAsset.priceHistory]
+            .filter((record) => record != null)
+            .sort((a, b) => {
+                if (!a?.timestamp || !b?.timestamp) return 0
+                return (
+                    new Date(a.timestamp).getTime() -
+                    new Date(b.timestamp).getTime()
+                )
+            })
+            .map((record) => ({
+                id: record!.id as number,
+                price: record!.price as number,
+                timestamp: record!.timestamp as string,
+            }))
     }, [currentAsset])
 
     useEffect(() => {
@@ -94,69 +147,7 @@ export const AssetPage = () => {
         }
     }, [error])
 
-    const handleEditClick = () => {
-        if (currentAsset?.value) {
-            setEditValue(currentAsset.value.toString())
-            setIsEditOpen(true)
-        }
-    }
-
-    const handleDeleteClick = () => {
-        setIsDeleteOpen(true)
-    }
-
-    const handleEditClose = () => {
-        setIsEditOpen(false)
-        if (currentAsset?.value) {
-            setEditValue(currentAsset.value.toString())
-        }
-    }
-
-    const handleDeleteClose = () => {
-        setIsDeleteOpen(false)
-    }
-
-    const handleEditSave = () => {
-        if (currentAsset?.id) {
-            updateAsset({
-                variables: {
-                    asset: {
-                        id: currentAsset.id,
-                        value: Number(editValue),
-                    },
-                },
-            })
-                .then(() => {
-                    refetch()
-                    handleEditClose()
-                })
-                .catch((error) => {
-                    const message =
-                        error.message ||
-                        'Failed to update asset. Please try again.'
-                    setErrorMessage(message)
-                    setSnackbarOpen(true)
-                    handleEditClose()
-                })
-        }
-    }
-
-    const handleDeleteConfirm = () => {
-        if (currentAsset?.id) {
-            deleteAsset({ variables: { id: currentAsset.id } })
-                .then(() => {
-                    navigate('/')
-                })
-                .catch((error) => {
-                    const message =
-                        error.message ||
-                        'Failed to delete asset. Please try again.'
-                    setErrorMessage(message)
-                    setSnackbarOpen(true)
-                    handleDeleteClose()
-                })
-        }
-    }
+    // Asset-level edit/delete controls removed per requirement
 
     const handleSnackbarClose = (
         event?: React.SyntheticEvent | Event,
@@ -202,6 +193,92 @@ export const AssetPage = () => {
         }
     }
 
+    const handleHistoryEditStart = (row: {
+        id: number
+        price: number
+        timestamp: string
+    }) => {
+        setEditingHistoryId(row.id)
+        setEditingHistoryPrice(String(row.price))
+        setEditingHistoryDate(new Date(row.timestamp))
+    }
+
+    const handleHistoryEditCancel = () => {
+        setEditingHistoryId(null)
+        setEditingHistoryPrice('')
+        setEditingHistoryDate(null)
+    }
+
+    const handleHistoryDeleteClick = (id: number) => {
+        setDeletingHistoryId(id)
+        setIsDeleteHistoryOpen(true)
+    }
+
+    const handleHistoryDeleteClose = () => {
+        setIsDeleteHistoryOpen(false)
+        setDeletingHistoryId(null)
+    }
+
+    const handleHistoryDeleteConfirm = async () => {
+        if (deletingHistoryId == null) return
+
+        try {
+            await deletePriceRecord({ variables: { id: deletingHistoryId } })
+            await refetch()
+            if (editingHistoryId === deletingHistoryId) {
+                handleHistoryEditCancel()
+            }
+            handleHistoryDeleteClose()
+        } catch (error: any) {
+            const message =
+                error?.message ||
+                'Failed to delete price record. Please try again.'
+            setErrorMessage(message)
+            setSnackbarOpen(true)
+            handleHistoryDeleteClose()
+        }
+    }
+
+    const toDateOnlyIsoString = (date: Date) => {
+        const localMidnight = new Date(
+            date.getFullYear(),
+            date.getMonth(),
+            date.getDate()
+        )
+        return localMidnight.toISOString()
+    }
+
+    const handleHistoryEditSave = async () => {
+        if (
+            editingHistoryId == null ||
+            !editingHistoryPrice ||
+            !editingHistoryDate
+        ) {
+            return
+        }
+
+        setSavingHistoryId(editingHistoryId)
+        try {
+            await updatePriceRecord({
+                variables: {
+                    id: editingHistoryId,
+                    price: Number(editingHistoryPrice),
+                    timestamp: toDateOnlyIsoString(editingHistoryDate),
+                },
+            })
+            await refetch()
+            handleHistoryEditCancel()
+        } catch (error: any) {
+            const message =
+                error?.message ||
+                'Failed to update price record. Please try again.'
+            setErrorMessage(message)
+            setSnackbarOpen(true)
+        } finally {
+            setSavingHistoryId(null)
+        }
+    }
+
     if (loading) {
         return (
             <Container>
@@ -238,7 +315,7 @@ export const AssetPage = () => {
                 sx={{
                     p: 4,
                     position: 'relative',
-                    opacity: updateLoading || deleteLoading ? 0.6 : 1,
+                    opacity: 1,
                 }}
             >
                 {/* Header - Asset Type */}
@@ -262,23 +339,19 @@ export const AssetPage = () => {
 
                 {/* Graph with Asset Changes History */}
                 <Box sx={{ mb: 4, minHeight: 400 }}>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                        <Typography
-                            variant="h6"
-                            color="text.secondary"
-                        >
+                    <Box
+                        sx={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            mb: 2,
+                        }}
+                    >
+                        <Typography variant="h6" color="text.secondary">
                             Value History
                         </Typography>
-                        <Button
-                            variant="outlined"
-                            startIcon={<AddIcon />}
-                            onClick={handleAddPriceClick}
-                            size="small"
-                        >
-                            Add Price Record
-                        </Button>
                     </Box>
-                    
+
                     {/* Date Range Filters */}
                     <LocalizationProvider dateAdapter={AdapterDateFns}>
                         <Stack direction="row" spacing={2} sx={{ mb: 3 }}>
@@ -286,18 +359,18 @@ export const AssetPage = () => {
                                 label="Start Date"
                                 value={startDate}
                                 onChange={(newValue) => setStartDate(newValue)}
-                                slotProps={{ 
+                                slotProps={{
                                     textField: { size: 'small' },
-                                    actionBar: { actions: ['clear'] }
+                                    actionBar: { actions: ['clear'] },
                                 }}
                             />
                             <DatePicker
                                 label="End Date"
                                 value={endDate}
                                 onChange={(newValue) => setEndDate(newValue)}
-                                slotProps={{ 
+                                slotProps={{
                                     textField: { size: 'small' },
-                                    actionBar: { actions: ['clear'] }
+                                    actionBar: { actions: ['clear'] },
                                 }}
                             />
                         </Stack>
@@ -310,7 +383,8 @@ export const AssetPage = () => {
                                     data: chartData.dates,
                                     label: 'Date',
                                     scaleType: 'time',
-                                    valueFormatter: (value) => new Date(value).toLocaleDateString(),
+                                    valueFormatter: (value) =>
+                                        new Date(value).toLocaleDateString(),
                                 },
                             ]}
                             yAxis={[
@@ -327,7 +401,12 @@ export const AssetPage = () => {
                                 },
                             ]}
                             height={300}
-                            margin={{ left: 70, right: 20, top: 20, bottom: 70 }}
+                            margin={{
+                                left: 70,
+                                right: 20,
+                                top: 20,
+                                bottom: 70,
+                            }}
                         />
                     ) : (
                         <Box
@@ -341,38 +420,248 @@ export const AssetPage = () => {
                             }}
                         >
                             <Typography color="text.secondary">
-                                No history data available. Add price records to see the chart.
+                                No history data available. Add price records to
+                                see the chart.
                             </Typography>
                         </Box>
                     )}
+
+                    <Box
+                        sx={{
+                            display: 'flex',
+                            justifyContent: 'flex-end',
+                            mt: 2,
+                        }}
+                    >
+                        <Button
+                            variant="outlined"
+                            startIcon={<AddIcon />}
+                            onClick={handleAddPriceClick}
+                            size="small"
+                        >
+                            Add Price Record
+                        </Button>
+                    </Box>
                 </Box>
 
-                {/* Action Buttons */}
-                <Box
-                    sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}
-                >
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        startIcon={<EditIcon />}
-                        onClick={handleEditClick}
-                        disabled={updateLoading || deleteLoading}
+                {/* History Table */}
+                <Box sx={{ mb: 4 }}>
+                    <Typography
+                        variant="h6"
+                        color="text.secondary"
+                        sx={{ mb: 2 }}
                     >
-                        Edit Asset Value
-                    </Button>
-                    <Button
-                        variant="contained"
-                        color="error"
-                        startIcon={<DeleteIcon />}
-                        onClick={handleDeleteClick}
-                        disabled={updateLoading || deleteLoading}
-                    >
-                        Delete Asset
-                    </Button>
+                        History
+                    </Typography>
+
+                    {historyRows.length > 0 ? (
+                        <TableContainer
+                            component={Paper}
+                            variant="outlined"
+                            sx={{ overflow: 'hidden' }}
+                        >
+                            <LocalizationProvider dateAdapter={AdapterDateFns}>
+                                <Table size="small">
+                                    <TableHead>
+                                        <TableRow>
+                                            <TableCell>Date</TableCell>
+                                            <TableCell align="right">
+                                                Value
+                                            </TableCell>
+                                            <TableCell align="right">
+                                                Actions
+                                            </TableCell>
+                                        </TableRow>
+                                    </TableHead>
+                                    <TableBody>
+                                        {historyRows.map((row) => {
+                                            const isEditing =
+                                                editingHistoryId === row.id
+                                            const isSaving =
+                                                savingHistoryId === row.id
+                                            const isDeleting =
+                                                deleteHistoryLoading &&
+                                                deletingHistoryId === row.id
+
+                                            return (
+                                                <TableRow key={row.id}>
+                                                    <TableCell
+                                                        sx={{ width: 220 }}
+                                                    >
+                                                        {isEditing ? (
+                                                            <DatePicker
+                                                                value={
+                                                                    editingHistoryDate
+                                                                }
+                                                                onChange={(
+                                                                    newValue
+                                                                ) =>
+                                                                    setEditingHistoryDate(
+                                                                        newValue
+                                                                    )
+                                                                }
+                                                                slotProps={{
+                                                                    textField: {
+                                                                        size: 'small',
+                                                                        fullWidth:
+                                                                            true,
+                                                                    },
+                                                                }}
+                                                            />
+                                                        ) : (
+                                                            new Date(
+                                                                row.timestamp
+                                                            ).toLocaleDateString()
+                                                        )}
+                                                    </TableCell>
+                                                    <TableCell
+                                                        align="right"
+                                                        sx={{ width: 200 }}
+                                                    >
+                                                        {isEditing ? (
+                                                            <TextField
+                                                                value={
+                                                                    editingHistoryPrice
+                                                                }
+                                                                onChange={(e) =>
+                                                                    setEditingHistoryPrice(
+                                                                        e.target
+                                                                            .value
+                                                                    )
+                                                                }
+                                                                type="number"
+                                                                size="small"
+                                                                fullWidth
+                                                                disabled={
+                                                                    isSaving
+                                                                }
+                                                            />
+                                                        ) : (
+                                                            row.price.toLocaleString()
+                                                        )}
+                                                    </TableCell>
+                                                    <TableCell
+                                                        align="right"
+                                                        sx={{ width: 140 }}
+                                                    >
+                                                        {isEditing ? (
+                                                            <>
+                                                                <Tooltip title="Save">
+                                                                    <span>
+                                                                        <IconButton
+                                                                            onClick={
+                                                                                handleHistoryEditSave
+                                                                            }
+                                                                            size="small"
+                                                                            disabled={
+                                                                                isSaving ||
+                                                                                !editingHistoryPrice ||
+                                                                                !editingHistoryDate
+                                                                            }
+                                                                        >
+                                                                            {isSaving ? (
+                                                                                <CircularProgress
+                                                                                    size={
+                                                                                        18
+                                                                                    }
+                                                                                />
+                                                                            ) : (
+                                                                                <CheckIcon fontSize="small" />
+                                                                            )}
+                                                                        </IconButton>
+                                                                    </span>
+                                                                </Tooltip>
+                                                                <Tooltip title="Cancel">
+                                                                    <span>
+                                                                        <IconButton
+                                                                            onClick={
+                                                                                handleHistoryEditCancel
+                                                                            }
+                                                                            size="small"
+                                                                            disabled={
+                                                                                isSaving
+                                                                            }
+                                                                        >
+                                                                            <CloseIcon fontSize="small" />
+                                                                        </IconButton>
+                                                                    </span>
+                                                                </Tooltip>
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <Tooltip title="Edit">
+                                                                    <span>
+                                                                        <IconButton
+                                                                            onClick={() =>
+                                                                                handleHistoryEditStart(
+                                                                                    row
+                                                                                )
+                                                                            }
+                                                                            size="small"
+                                                                            disabled={
+                                                                                savingHistoryId !=
+                                                                                    null ||
+                                                                                deleteHistoryLoading
+                                                                            }
+                                                                        >
+                                                                            <EditIcon fontSize="small" />
+                                                                        </IconButton>
+                                                                    </span>
+                                                                </Tooltip>
+                                                                <Tooltip title="Delete">
+                                                                    <span>
+                                                                        <IconButton
+                                                                            onClick={() =>
+                                                                                handleHistoryDeleteClick(
+                                                                                    row.id
+                                                                                )
+                                                                            }
+                                                                            size="small"
+                                                                            color="error"
+                                                                            disabled={
+                                                                                savingHistoryId !=
+                                                                                    null ||
+                                                                                deleteHistoryLoading
+                                                                            }
+                                                                        >
+                                                                            {isDeleting ? (
+                                                                                <CircularProgress
+                                                                                    size={18}
+                                                                                />
+                                                                            ) : (
+                                                                                <DeleteIcon fontSize="small" />
+                                                                            )}
+                                                                        </IconButton>
+                                                                    </span>
+                                                                </Tooltip>
+                                                            </>
+                                                        )}
+                                                    </TableCell>
+                                                </TableRow>
+                                            )
+                                        })}
+                                    </TableBody>
+                                </Table>
+                            </LocalizationProvider>
+                        </TableContainer>
+                    ) : (
+                        <Paper
+                            variant="outlined"
+                            sx={{
+                                p: 2,
+                                borderStyle: 'dashed',
+                                borderColor: 'divider',
+                            }}
+                        >
+                            <Typography color="text.secondary">
+                                No history records yet.
+                            </Typography>
+                        </Paper>
+                    )}
                 </Box>
 
                 {/* Loading Backdrop */}
-                {(updateLoading || deleteLoading || addPriceLoading) && (
+                {addPriceLoading && (
                     <Backdrop
                         open={true}
                         sx={{
@@ -386,85 +675,6 @@ export const AssetPage = () => {
                     </Backdrop>
                 )}
             </Paper>
-
-            {/* Edit Dialog */}
-            <Dialog
-                open={isEditOpen}
-                onClose={handleEditClose}
-                maxWidth="sm"
-                fullWidth
-            >
-                <DialogTitle>Edit {currentAsset.type}</DialogTitle>
-                <DialogContent>
-                    <TextField
-                        autoFocus
-                        margin="dense"
-                        label="Asset Value"
-                        type="number"
-                        fullWidth
-                        variant="outlined"
-                        value={editValue}
-                        onChange={(e) => setEditValue(e.target.value)}
-                        disabled={updateLoading}
-                        sx={{ mt: 2 }}
-                    />
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleEditClose} disabled={updateLoading}>
-                        Cancel
-                    </Button>
-                    <Button
-                        onClick={handleEditSave}
-                        variant="contained"
-                        disabled={updateLoading || !editValue}
-                        startIcon={
-                            updateLoading ? (
-                                <CircularProgress size={16} />
-                            ) : null
-                        }
-                    >
-                        Save
-                    </Button>
-                </DialogActions>
-            </Dialog>
-
-            {/* Delete Dialog */}
-            <Dialog
-                open={isDeleteOpen}
-                onClose={handleDeleteClose}
-                maxWidth="sm"
-                fullWidth
-            >
-                <DialogTitle>Delete {currentAsset.type}?</DialogTitle>
-                <DialogContent>
-                    <Typography>
-                        Are you sure you want to delete {currentAsset.type} with
-                        value {currentAsset.value}? This action cannot be
-                        undone.
-                    </Typography>
-                </DialogContent>
-                <DialogActions>
-                    <Button
-                        onClick={handleDeleteClose}
-                        disabled={deleteLoading}
-                    >
-                        Cancel
-                    </Button>
-                    <Button
-                        onClick={handleDeleteConfirm}
-                        variant="contained"
-                        color="error"
-                        disabled={deleteLoading}
-                        startIcon={
-                            deleteLoading ? (
-                                <CircularProgress size={16} />
-                            ) : null
-                        }
-                    >
-                        Delete
-                    </Button>
-                </DialogActions>
-            </Dialog>
 
             {/* Add Price Record Dialog */}
             <Dialog
@@ -502,13 +712,18 @@ export const AssetPage = () => {
                     </LocalizationProvider>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={handleAddPriceClose} disabled={addPriceLoading}>
+                    <Button
+                        onClick={handleAddPriceClose}
+                        disabled={addPriceLoading}
+                    >
                         Cancel
                     </Button>
                     <Button
                         onClick={handleAddPriceSave}
                         variant="contained"
-                        disabled={addPriceLoading || !manualPrice || !manualDate}
+                        disabled={
+                            addPriceLoading || !manualPrice || !manualDate
+                        }
                         startIcon={
                             addPriceLoading ? (
                                 <CircularProgress size={16} />
@@ -516,6 +731,43 @@ export const AssetPage = () => {
                         }
                     >
                         Add
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Delete History Record Dialog */}
+            <Dialog
+                open={isDeleteHistoryOpen}
+                onClose={handleHistoryDeleteClose}
+                maxWidth="sm"
+                fullWidth
+            >
+                <DialogTitle>Delete history record?</DialogTitle>
+                <DialogContent>
+                    <Typography>
+                        Are you sure you want to delete this history record? This
+                        action cannot be undone.
+                    </Typography>
+                </DialogContent>
+                <DialogActions>
+                    <Button
+                        onClick={handleHistoryDeleteClose}
+                        disabled={deleteHistoryLoading}
+                    >
+                        Cancel
+                    </Button>
+                    <Button
+                        onClick={handleHistoryDeleteConfirm}
+                        variant="contained"
+                        color="error"
+                        disabled={deleteHistoryLoading}
+                        startIcon={
+                            deleteHistoryLoading ? (
+                                <CircularProgress size={16} />
+                            ) : null
+                        }
+                    >
+                        Delete
                     </Button>
                 </DialogActions>
             </Dialog>

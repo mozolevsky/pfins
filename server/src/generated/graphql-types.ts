@@ -46,7 +46,9 @@ export type Mutation = {
   addAsset?: Maybe<Asset>;
   addPriceRecord?: Maybe<PriceHistory>;
   deleteAsset?: Maybe<Scalars['String']['output']>;
+  deletePriceRecord: Scalars['Int']['output'];
   updateAsset?: Maybe<Asset>;
+  updatePriceRecord?: Maybe<PriceHistory>;
 };
 
 
@@ -67,8 +69,20 @@ export type MutationDeleteAssetArgs = {
 };
 
 
+export type MutationDeletePriceRecordArgs = {
+  id: Scalars['Int']['input'];
+};
+
+
 export type MutationUpdateAssetArgs = {
   asset?: InputMaybe<AssetUpdateInput>;
+};
+
+
+export type MutationUpdatePriceRecordArgs = {
+  id: Scalars['Int']['input'];
+  price: Scalars['Float']['input'];
+  timestamp: Scalars['String']['input'];
 };
 
 export type PriceHistory = {
@@ -215,7 +229,9 @@ export type MutationResolvers<ContextType = any, ParentType extends ResolversPar
   addAsset?: Resolver<Maybe<ResolversTypes['Asset']>, ParentType, ContextType, Partial<MutationAddAssetArgs>>;
   addPriceRecord?: Resolver<Maybe<ResolversTypes['PriceHistory']>, ParentType, ContextType, RequireFields<MutationAddPriceRecordArgs, 'assetId' | 'price'>>;
   deleteAsset?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType, RequireFields<MutationDeleteAssetArgs, 'id'>>;
+  deletePriceRecord?: Resolver<ResolversTypes['Int'], ParentType, ContextType, RequireFields<MutationDeletePriceRecordArgs, 'id'>>;
   updateAsset?: Resolver<Maybe<ResolversTypes['Asset']>, ParentType, ContextType, Partial<MutationUpdateAssetArgs>>;
+  updatePriceRecord?: Resolver<Maybe<ResolversTypes['PriceHistory']>, ParentType, ContextType, RequireFields<MutationUpdatePriceRecordArgs, 'id' | 'price' | 'timestamp'>>;
 };
 
 export type PriceHistoryResolvers<ContextType = any, ParentType extends ResolversParentTypes['PriceHistory'] = ResolversParentTypes['PriceHistory']> = {

@@ -24,3 +24,16 @@ mutation AddPriceRecord($assetId: String!, $price: Float!, $timestamp: String) {
         timestamp
     }
 }
+
+mutation UpdatePriceRecord($id: Int!, $price: Float!, $timestamp: String!) {
+    updatePriceRecord(id: $id, price: $price, timestamp: $timestamp) {
+        id
+        assetId
+        price
+        timestamp
+    }
+}
+
+mutation DeletePriceRecord($id: Int!) {
+    deletePriceRecord(id: $id)
+}
