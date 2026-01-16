@@ -1,4 +1,4 @@
-import { useParams } from 'react-router'
+import { useParams, useNavigate } from 'react-router'
 import { useState, useEffect, useMemo } from 'react'
 import {
     Box,
@@ -16,6 +16,8 @@ import {
     CircularProgress,
     Backdrop,
     Stack,
+    Tabs,
+    Tab,
     Table,
     TableBody,
     TableCell,
@@ -31,11 +33,13 @@ import {
     Add as AddIcon,
     Check as CheckIcon,
     Close as CloseIcon,
+    ArrowBack as ArrowBackIcon,
 } from '@mui/icons-material'
 import { LineChart } from '@mui/x-charts/LineChart'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
+import { endOfDay, startOfDay, subDays, subMonths, subYears } from 'date-fns'
 import {
     useGetAssetWithHistoryQuery,
     useAddPriceRecordMutation,
@@ -45,9 +49,13 @@ import {
 
 export const AssetPage = () => {
     const { type } = useParams<{ type: string }>()
+    const navigate = useNavigate()
     const [isAddPriceOpen, setIsAddPriceOpen] = useState(false)
     const [manualPrice, setManualPrice] = useState('')
     const [manualDate, setManualDate] = useState<Date | null>(new Date())
+    const [historyPeriod, setHistoryPeriod] = useState<
+        'day' | '3days' | 'week' | 'month' | 'year' | 'all' | 'custom'
+    >('all')
     const [startDate, setStartDate] = useState<Date | null>(null)
     const [endDate, setEndDate] = useState<Date | null>(null)
     const [errorMessage, setErrorMessage] = useState<string | null>(null)
@@ -146,6 +154,46 @@ export const AssetPage = () => {
             setSnackbarOpen(true)
         }
     }, [error])
+
+    useEffect(() => {
+        const now = new Date()
+        const rangeEnd = endOfDay(now)
+
+        if (historyPeriod === 'all') {
+            setStartDate(null)
+            setEndDate(null)
+            return
+        }
+
+        if (historyPeriod === 'custom') {
+            setStartDate(null)
+            setEndDate(null)
+            return
+        }
+
+        const rangeStart =
+            historyPeriod === 'day'
+                ? startOfDay(now)
+                : historyPeriod === '3days'
+                  ? startOfDay(subDays(now, 2))
+                  : historyPeriod === 'week'
+                    ? startOfDay(subDays(now, 6))
+                    : historyPeriod === 'month'
+                      ? startOfDay(subMonths(now, 1))
+                      : startOfDay(subYears(now, 1))
+
+        setStartDate(rangeStart)
+        setEndDate(rangeEnd)
+    }, [historyPeriod])
+
+    const handleBackClick = () => {
+        // Prefer router/browser back; otherwise go home
+        if (window.history.length > 1) {
+            navigate(-1)
+        } else {
+            navigate('/')
+        }
+    }
 
     // Asset-level edit/delete controls removed per requirement
 
@@ -318,6 +366,17 @@ export const AssetPage = () => {
                     opacity: 1,
                 }}
             >
+                <Tooltip title="Back">
+                    <IconButton
+                        onClick={handleBackClick}
+                        size="small"
+                        sx={{ position: 'absolute', top: 12, left: 12 }}
+                        aria-label="Back"
+                    >
+                        <ArrowBackIcon />
+                    </IconButton>
+                </Tooltip>
+
                 {/* Header - Asset Type */}
                 <Typography variant="h4" component="h1" sx={{ mb: 4 }}>
                     {currentAsset.type || type}
@@ -348,33 +407,75 @@ export const AssetPage = () => {
                         }}
                     >
                         <Typography variant="h6" color="text.secondary">
-                            Value History
+                            Hisroty period
                         </Typography>
                     </Box>
 
-                    {/* Date Range Filters */}
-                    <LocalizationProvider dateAdapter={AdapterDateFns}>
-                        <Stack direction="row" spacing={2} sx={{ mb: 3 }}>
-                            <DatePicker
-                                label="Start Date"
-                                value={startDate}
-                                onChange={(newValue) => setStartDate(newValue)}
-                                slotProps={{
-                                    textField: { size: 'small' },
-                                    actionBar: { actions: ['clear'] },
-                                }}
-                            />
-                            <DatePicker
-                                label="End Date"
-                                value={endDate}
-                                onChange={(newValue) => setEndDate(newValue)}
-                                slotProps={{
-                                    textField: { size: 'small' },
-                                    actionBar: { actions: ['clear'] },
-                                }}
-                            />
-                        </Stack>
-                    </LocalizationProvider>
+                    <Tabs
+                        value={historyPeriod}
+                        onChange={(_, value) => setHistoryPeriod(value)}
+                        variant="scrollable"
+                        allowScrollButtonsMobile
+                        sx={{
+                            mb: 2,
+                            p: 0.5,
+                            border: 1,
+                            borderColor: 'divider',
+                            borderRadius: 1,
+                            bgcolor: 'background.paper',
+                            '& .MuiTabs-indicator': {
+                                height: 3,
+                                borderRadius: 2,
+                            },
+                            '& .MuiTab-root': {
+                                minHeight: 36,
+                                textTransform: 'none',
+                                color: 'text.secondary',
+                                borderRadius: 1,
+                                px: 1.5,
+                            },
+                            '& .MuiTab-root.Mui-selected': {
+                                color: 'primary.main',
+                                fontWeight: 700,
+                                bgcolor: 'action.selected',
+                            },
+                        }}
+                    >
+                        <Tab label="day" value="day" />
+                        <Tab label="3 days" value="3days" />
+                        <Tab label="week" value="week" />
+                        <Tab label="month" value="month" />
+                        <Tab label="year" value="year" />
+                        <Tab label="all" value="all" />
+                        <Tab label="custom" value="custom" />
+                    </Tabs>
+
+                    {historyPeriod === 'custom' && (
+                        <LocalizationProvider dateAdapter={AdapterDateFns}>
+                            <Stack direction="row" spacing={2} sx={{ mb: 3 }}>
+                                <DatePicker
+                                    label="Start Date"
+                                    value={startDate}
+                                    onChange={(newValue) =>
+                                        setStartDate(newValue)
+                                    }
+                                    slotProps={{
+                                        textField: { size: 'small' },
+                                        actionBar: { actions: ['clear'] },
+                                    }}
+                                />
+                                <DatePicker
+                                    label="End Date"
+                                    value={endDate}
+                                    onChange={(newValue) => setEndDate(newValue)}
+                                    slotProps={{
+                                        textField: { size: 'small' },
+                                        actionBar: { actions: ['clear'] },
+                                    }}
+                                />
+                            </Stack>
+                        </LocalizationProvider>
+                    )}
 
                     {chartData.values.length > 0 ? (
                         <LineChart
